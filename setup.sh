@@ -1,4 +1,6 @@
 
+git config --global user.name "Caesar723"
+git config --global user.email "13122531903@163.com"
 
 
 wget https://github.com/WiringPi/WiringPi/releases/download/2.61-1/wiringpi-2.61-1-arm64.deb
