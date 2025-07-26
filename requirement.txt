@@ -1,0 +1,14 @@
+colorzero==2.0
+gpiozero==2.0.1
+lgpio==0.2.2.0
+numpy==2.3.2
+pillow==11.3.0
+pip==23.0.1
+RPi.GPIO==0.7.1
+setuptools==66.1.1
+spidev==3.7
+fastapi[all]
+uvicorn[standard]
+openai
+httpx
+aiohttp

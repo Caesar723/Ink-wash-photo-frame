@@ -13,6 +13,8 @@ import time
 from PIL import Image,ImageDraw,ImageFont
 import traceback
 
+
+
 logging.basicConfig(level=logging.DEBUG)
 
 try:
