@@ -28,6 +28,8 @@ python3 -m venv myenv
 source myenv/bin/activate
 
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip3 install playwright -i https://pypi.tuna.tsinghua.edu.cn/simple
+playwright install
 
 # pip3 install RPi.GPIO -i https://pypi.tuna.tsinghua.edu.cn/simple
 # pip3 install pillow numpy -i https://pypi.tuna.tsinghua.edu.cn/simple

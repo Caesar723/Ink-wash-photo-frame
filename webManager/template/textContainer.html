@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多样化响应式装饰边框</title>
+  <style>
+    /* 全局重置 */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* 主容器基础 */
+    .border-container {
+      position: relative;
+      width: 90vw;
+      height: 90vh;
+      box-sizing: border-box;
+      padding: 2vw;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: 'CustomFont', Arial, sans-serif;
+      color: #333;
+    }
+
+    /* 默认样式：现代简约渐变 */
+    .border-container.modern {
+      border: 1vw solid transparent;
+      border-image-source: linear-gradient(135deg, #ff6ec4, #7873f5);
+      border-image-slice: 1;
+      border-radius: 2vw;
+      box-shadow: 0 0 2vw rgba(0,0,0,0.1);
+    }
+
+    /* 古风（希腊回纹 + 朱砂印章） */
+    .border-container.ancient {
+      background: rgba(245,240,225,0.9);
+      border: 1.5vw solid transparent;
+      border-image-source: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60'><path d='M10,0 L10,50 L60,50' fill='none' stroke='%238b5e3c' stroke-width='4'/><path d='M0,10 L50,10 L50,60' fill='none' stroke='%238b5e3c' stroke-width='4'/></svg>");
+      border-image-slice: 30;
+      border-image-repeat: round;
+      box-shadow: 0 0 1.5vw rgba(0,0,0,0.2);
+    }
+    .border-container.ancient .seal { display: block; }
+
+    /* 左上角与右下角装饰 */
+    .border-container.corner {
+      border: none;
+    }
+    .border-container.corner::before,
+    .border-container.corner::after {
+      content: "";
+      position: absolute;
+      box-sizing: border-box;
+      width: 25vw;
+      height: 25vw;
+    }
+    .border-container.corner::before {
+      top: 2vw;
+      left: 2vw;
+      border-top: 1.5vw solid #000;
+      border-left: 1.5vw solid #000;
+    }
+    .border-container.corner::after {
+      bottom: 2vw;
+      right: 2vw;
+      border-bottom: 1.5vw solid #000;
+      border-right: 1.5vw solid #000;
+    }
+
+    /* 花卉装饰（左右枝干） */
+    .flower { display: none; position: absolute; top: 5%; width: 8vw; height: 90%; }
+    .flower svg { width:100%; height:100%; }
+    .flower.left { left:1vw; }
+    .flower.right { right:1vw; transform: scaleX(-1); }
+    .border-container.floral .flower { display: block; }
+
+    /* 装饰通用：隐藏各自之外的元素 */
+    .seal, .flower.left, .flower.right { display: none; }
+
+    /* 朱砂印章 */
+    .seal {
+      position:absolute;
+      bottom:3vw;
+      right:3vw;
+      width:6vw;
+      height:6vw;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='60' font-size='80' text-anchor='middle' fill='%23b22222' font-family='serif'>印</text></svg>");
+      background-size:contain;
+      background-repeat:no-repeat;
+      opacity:0.8;
+    }
+
+    /* 横竖兼容：竖排模式 */
+    @media (orientation: portrait) {
+      .border-container p { writing-mode: vertical-rl; text-orientation: upright; }
+    }
+  </style>
+  <script>
+    // 动态注入 @font-face，根据 URL 参数 font
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const fontUrl = params.get('font') || 'fonts/YourFontFile.ttf';
+      const styleEl = document.createElement('style');
+      styleEl.innerHTML = `
+        @font-face {
+          font-family: 'CustomFont';
+          src: url('${fontUrl}') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+      `;
+      document.head.appendChild(styleEl);
+    })();
+  </script>
+</head>
+<body>
+  <div id="border-container" class="border-container">
+    <!-- 古风印章 -->
+    <div class="seal"></div>
+    <!-- 花卉装饰 -->
+    <div class="flower left">
+      <svg viewBox="0 0 100 300" xmlns="http://www.w3.org/2000/svg">
+        <line x1="50" y1="0" x2="50" y2="300" stroke="#4b8b3b" stroke-width="5" />
+        <circle cx="30" cy="50" r="15" fill="#ff7bac" />
+        <circle cx="70" cy="100" r="12" fill="#ff7bac" />
+        <circle cx="40" cy="150" r="18" fill="#ff7bac" />
+        <circle cx="60" cy="200" r="14" fill="#ff7bac" />
+      </svg>
+    </div>
+    <div class="flower right">
+      <svg viewBox="0 0 100 300" xmlns="http://www.w3.org/2000/svg">
+        <line x1="50" y1="0" x2="50" y2="300" stroke="#4b8b3b" stroke-width="5" />
+        <circle cx="30" cy="50" r="15" fill="#ff7bac" />
+        <circle cx="70" cy="100" r="12" fill="#ff7bac" />
+        <circle cx="40" cy="150" r="18" fill="#ff7bac" />
+        <circle cx="60" cy="200" r="14" fill="#ff7bac" />
+      </svg>
+    </div>
+    <p id="text-content" style="font-size: 30px;">这里是可通过 URL 参数切换的多样化装饰边框示例。</p>
+  </div>
+  <script>
+    // 读取 URL 参数 style，并给容器添加对应类名
+    const container = document.getElementById('border-container');
+    const params = new URLSearchParams(window.location.search);
+    const style = params.get('style') || 'modern';
+    container.classList.add(style);
+
+    const textContent = document.getElementById('text-content');
+    const text = params.get('text') || '这里是可通过 URL 参数切换的多样化装饰边框示例。';
+    textContent.textContent = text;
+
+  </script>
+</body>
+</html>

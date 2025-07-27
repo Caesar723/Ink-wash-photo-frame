@@ -1,0 +1,27 @@
+basic_store_path: "webManager/static/images/shored_img"
+basic_port: 23433
+
+
+basic_image_path: "webManager/static/images/shored_img"
+basic_frame_path: "webManager/static/images/image_frame"
+basic_font_path: "webManager/static/font"
+target_img_size: [800, 480]
+
+chat_base_url: "https://www.dmxapi.com/v1"
+chat_api_token: "sk-SWLjAPztaxyu5dQnfhT2EyxFD4idjsqWVHUZ5MESTIGRVuis"
+chat_model: "Doubao-1.5-lite-32k"
+
+
+pre_content: |
+  你也许正在经历一些看不到尽头的时刻，像是站在夜里、海雾之中，看不到彼岸。
+  但请记住——每一段逆流而上的日子，都是为了积蓄未来乘风破浪的力量。
+
+  哪怕此刻的你很小、很普通、甚至有点迷失，
+  也无妨。人生真正的光芒，往往来自最暗的深海里慢慢发亮。
+
+  你不是沉没，而是在酝酿属于你的风帆。
+
+
+
+whether_api_token: "f077afc158a17acaef193a6f67b0f5d3"
+whether_city: "Shanghai,cn"

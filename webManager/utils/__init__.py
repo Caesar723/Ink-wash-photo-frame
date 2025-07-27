@@ -1,0 +1,1 @@
+BASE_SAVE_PATH="webManager/static/images/shored_img"

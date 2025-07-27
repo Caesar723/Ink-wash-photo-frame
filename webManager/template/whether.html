@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>动态天气仪表盘（5 天/3 小时预报 API）</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Weather Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3"></script>
+  <!-- DataLabels Plugin -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <style>
+    html, body { width:100%; height:100%; margin:0; padding:0; font-family:'Poppins',sans-serif; background:#f5f7fa; color:#333; overflow:hidden; }
+    .dashboard { display:grid; grid-template-rows:auto 1fr auto; height:100%; width:100%; }
+    .header { text-align:center; padding:1rem; border-bottom:1px solid #eee; }
+    .header h1 { font-size:2rem; font-weight:600; margin:0; }
+    .header p { margin:.25rem 0; color:#666; }
+    .main { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; padding:1rem; gap:1rem; }
+    .current { flex:1 1 150px; text-align:center; }
+    .current .icon { font-size:3rem; color:#87ceeb; }
+    .current .temp { font-size:2.5rem; font-weight:600; margin:.3rem 0; }
+    .current .feel { color:#777; font-size:.9rem; }
+    .details { flex:2 1 300px; display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:.5rem 1rem; }
+    .detail { display:flex; align-items:center; font-size:.9rem; }
+    .detail i { font-size:1.2rem; margin-right:.5rem; color:#f39c12; }
+    .chart-container { flex:1 1 100%; height:25vh; }
+    .chart-container canvas { width:100%; height:100%; }
+    .forecast { display:grid; grid-template-columns:repeat(auto-fit,minmax(80px,1fr)); gap:.5rem; padding:.5rem; border-top:1px solid #eee; background:#fafafa; }
+    .day-card { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:.5rem; background:#fff; border-radius:8px; box-shadow:0 1px 5px rgba(0,0,0,0.1); font-size:.8rem; }
+    .day-card i { font-size:1.5rem; margin-bottom:.25rem; color:#ffb400; }
+    .day-card .temp-range { color:#777; }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="header">
+      <h1 id="city">--</h1>
+      <p id="date">--</p>
+    </div>
+    <div class="main">
+      <div class="current">
+        <i id="w-icon" class="wi"></i>
+        <div class="temp" id="temp">--℃</div>
+        <div class="feel" id="feel">体感 --℃</div>
+      </div>
+      <div class="details" id="details"></div>
+      <div class="chart-container"><canvas id="hourlyChart"></canvas></div>
+    </div>
+    <div class="forecast" id="forecast"></div>
+  </div>
+
+  <script>
+    Chart.register(ChartDataLabels);
+    const apiKey = '{{ api_key }}';
+    const cityName = '{{ city_name }}';
+
+    // 详情项（中文标签）
+    const detailItems = [
+      { label: '日出', key: 'sys.sunrise', icon: 'wi-sunrise' },
+      { label: '日落', key: 'sys.sunset', icon: 'wi-sunset' },
+      { label: '风速', key: 'wind.speed', icon: 'wi-strong-wind' },
+      { label: '湿度', key: 'main.humidity', icon: 'wi-humidity' },
+      { label: '气压', key: 'main.pressure', icon: 'wi-barometer' },
+      { label: '能见度', key: 'visibility', icon: 'wi-day-sunny-overcast' }
+    ];
+
+    // 获取经纬度
+    fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`)
+      .then(res => res.json())
+      .then(loc => {
+        if (!loc[0]) throw '未找到城市';
+        const { lat, lon, name } = loc[0];
+        document.getElementById('city').textContent = name;
+        document.getElementById('date').textContent = new Date().toLocaleDateString('zh-CN', { weekday:'long', month:'long', day:'numeric' });
+        return fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`)
+          .then(r => r.json())
+          .then(current => ({ lat, lon, current }));
+      })
+      .then(({ lat, lon, current }) => {
+        // 填充当前天气
+        document.getElementById('temp').textContent = `${Math.round(current.main.temp)}℃`;
+        document.getElementById('feel').textContent = `体感 ${Math.round(current.main.feels_like)}℃`;
+        document.getElementById('w-icon').className = `wi wi-owm-${current.weather[0].id}`;
+        // 详情
+        const det = document.getElementById('details'); det.innerHTML = '';
+        detailItems.forEach(it => {
+          let val = it.key.split('.').reduce((o,k)=>o[k], current);
+          if (it.key.startsWith('sys.')) val = new Date(val*1000).toLocaleTimeString('zh-CN',{hour:'numeric',minute:'numeric'});
+          if (it.label === '能见度') val = `${val}m`;
+          det.innerHTML += `<div class="detail"><i class="wi ${it.icon}"></i><span>${it.label} ${val}</span></div>`;
+        });
+        // 获取 5 天/3 小时预报（默认40条）
+        return fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`);
+      })
+      .then(res => res.json())
+      .then(forecast => {
+        const list = forecast.list; // 40条，5天
+        // 小时图
+        const hours = list.slice(0,8);
+        const labels = hours.map(h => new Date(h.dt*1000).getHours() + '时');
+        const temps = hours.map(h => Math.round(h.main.temp));
+        const rains = hours.map(h => h.rain?.['3h'] || 0);
+        new Chart(document.getElementById('hourlyChart'), {
+          data: { labels, datasets: [
+            { type:'line', label:'温度 (℃)', data:temps, borderColor:'orange', backgroundColor:'transparent', borderWidth:2, tension:0.3 },
+            { type:'bar', label:'降水量 (mm)', data:rains, backgroundColor:'rgba(0,123,255,0.6)', datalabels:{anchor:'end',align:'end',formatter:v=>v} }
+          ]},
+          options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'top'}, datalabels:{font:{size:10}}}, scales:{ y:{ beginAtZero:false } } }
+        });
+        // 日预报：按日期聚合，取最大最小
+        const daily = {};
+        list.forEach(item => {
+          const date = new Date(item.dt*1000).toLocaleDateString('zh-CN');
+          if (!daily[date]) daily[date] = { temps: [], weatherId: item.weather[0].id, dt: item.dt };
+          daily[date].temps.push(item.main.temp);
+        });
+        const days = Object.keys(daily).slice(1,6); // 排除今日
+        const fc = document.getElementById('forecast'); fc.innerHTML = '';
+        days.forEach(date => {
+          const info = daily[date];
+          const max = Math.round(Math.max(...info.temps));
+          const min = Math.round(Math.min(...info.temps));
+          const weekday = new Date(info.dt*1000).toLocaleDateString('zh-CN', { weekday:'short' });
+          fc.innerHTML += `<div class="day-card"><div>${weekday}</div><i class="wi wi-owm-${info.weatherId}"></i><div class="temp-range">${max}°/${min}°</div></div>`;
+        });
+      })
+      .catch(e => console.error('天气获取失败:', e));
+  </script>
+</body>
+</html>

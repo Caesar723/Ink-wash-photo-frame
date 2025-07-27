@@ -12,3 +12,4 @@ uvicorn[standard]
 openai
 httpx
 aiohttp
+apscheduler
