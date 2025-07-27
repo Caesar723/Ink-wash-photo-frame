@@ -32,3 +32,9 @@ module_used:
   - "webManager.module.imageReader.ImageReader"
   - "webManager.module.whetherReport.BaseWhetherReport"
   - "webManager.module.chatApi.ChatApi"
+
+
+image_selector_interval:
+  minutes: 1
+  hours: 0
+  days: 0

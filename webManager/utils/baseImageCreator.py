@@ -5,9 +5,11 @@ import random
 from playwright.async_api import async_playwright
 from io import BytesIO
 
+from webManager.utils.baseHookManager import BaseHookManager
 
-class BaseImageCreator:
+class BaseImageCreator(BaseHookManager):
     def __init__(self,config):
+        super().__init__()
         self.config=config
 
         self.client = AsyncOpenAI(
@@ -28,7 +30,7 @@ class BaseImageCreator:
         
         return content
 
-    def when_config_change(self):
+    def when_config_change(self,key,value):
         pass
 
     async def create_image(self):

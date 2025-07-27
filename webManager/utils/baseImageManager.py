@@ -9,12 +9,15 @@ if __name__ == "__main__":
 from webManager.utils.helper import do_task,task_wrapper
 
 
-class BaseImageManager:
+from webManager.utils.baseHookManager import BaseHookManager
+
+class BaseImageManager(BaseHookManager):
     def __init__(self,config):
+        super().__init__()
         self.config=config
         self.task_queue = asyncio.Queue()
 
-    def when_config_change(self):
+    def when_config_change(self,key,value):
         pass
 
         

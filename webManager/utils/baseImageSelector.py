@@ -8,11 +8,12 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from webManager.utils.helper import get_class_by_name
 from webManager.utils.baseImageManager import BaseImageManager
+from webManager.utils.baseHookManager import BaseHookManager
 
 
-
-class BaseImageSelector:
+class BaseImageSelector(BaseHookManager):
     def __init__(self,config,baseImageManager:BaseImageManager):
+        super().__init__()
         self.config=config
         self.baseImageManager=baseImageManager
         self.modules=[
@@ -24,7 +25,7 @@ class BaseImageSelector:
 
         
 
-    def when_config_change(self):
+    def when_config_change(self,key,value):
         pass
 
     
@@ -37,7 +38,10 @@ class BaseImageSelector:
         
 
     def start(self):
-        self.scheduler.add_job(self.select_image, 'interval', minutes=1)
+        self.scheduler.add_job(self.select_image, 'interval', 
+        minutes=self.config["image_selector_interval"]["minutes"],
+        hours=self.config["image_selector_interval"]["hours"],
+        days=self.config["image_selector_interval"]["days"])
 
         # Add job that runs every 1 hour
         # self.scheduler.add_job(self.select_image, 'interval', hours=1)
