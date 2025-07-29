@@ -8,7 +8,9 @@ from utils.helper import read_yaml
 from router import page,apis
 import uvicorn
 
-
+if __name__ == "__main__":
+    import sys,os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from webManager.utils.baseImageManager import BaseImageManager
 from webManager.utils.baseImageSelector import BaseImageSelector
 
@@ -19,15 +21,26 @@ class AppServer:
         self.config=read_yaml(config_path)
         self.templates = Jinja2Templates(directory="webManager/template")
 
-        self.baseImageManager=BaseImageManager(self.config)
-        self.baseImageSelector=BaseImageSelector(self.config,self.baseImageManager)
-        
+       
         self.app = FastAPI()
+        
         self.app.mount("/static", StaticFiles(directory="webManager/static"), name="static")
 
         
         self.setup_routes()
 
+        
+
+
+        @self.app.on_event("startup")
+        async def start_worker():
+            print("start_worker")
+            self.baseImageManager=BaseImageManager(self.config)
+            self.baseImageSelector=BaseImageSelector(self.config,self.baseImageManager)
+            await self.baseImageManager.start_task_worker()
+
+        
+        
         # for r in self.app.router.routes:
         #     print(f"[ROUTE] {r.path} → {getattr(r, 'methods', '')}")
 

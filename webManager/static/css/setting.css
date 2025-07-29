@@ -1,0 +1,133 @@
+.container {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+  
+  /* —— Pill Toggle —— */
+  .segmented {
+    display: flex;
+    background: #e9ecef;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .segmented input { display: none; }
+  .segmented label {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s, color 0.3s;
+  }
+  #hor:checked + label[for="hor"],
+  #ver:checked + label[for="ver"] {
+    background: var(--accent);
+    color: #fff;
+  }
+  
+  /* —— Scroll‑Snap Spinners —— */
+  .time-picker {
+    display: flex;
+    gap: 8px;
+  }
+  .spinner {
+    position: relative;
+    flex: 1;
+    height: 200px;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+  }
+  .spinner-item {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scroll-snap-align: center;
+    font-size: 18px;
+    color: var(--text);
+    transition: color 0.2s, font-weight 0.2s;
+  }
+  .spinner-item.selected {
+    color: var(--accent);
+    font-weight: bold;
+  }
+  /* 关键改动：让 mask 的 height 包含 border，保证上下框线都落在预期位置 */
+  .spinner-mask {
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    box-sizing: border-box;
+  }
+  .btn-submit {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 20px;
+  }
+  .btn-submit:hover {
+    background: #0056b3;
+  }
+  .components-container{
+      margin-bottom: 20px;
+  }
+  .component-list {
+        flex: 1;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding: 16px;
+        max-height: 400px;
+        overflow-y: auto;
+        
+      }
+      .component-list h3 {
+        margin-top: 0;
+        font-size: 18px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 8px;
+      }
+      .component-item {
+        padding: 10px 12px;
+        margin: 8px 0;
+        background: #e9ecef;
+        border-radius: 6px;
+        cursor: grab;
+        user-select: none;
+        transition: background 0.2s;
+      }
+      .component-item:active {
+        cursor: grabbing;
+        background: #d0d4d8;
+      }
+      #components-choose{
+          display: flex;
+        gap: 20px;
+        
+        width: 100%;
+      }
+  
+      #unused-components,#used-components{
+          height: 300px;
+          overflow-y: auto;
+          
+      }

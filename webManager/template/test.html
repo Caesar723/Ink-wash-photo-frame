@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>相框设置（蓝线完美对齐）</title>
+<style>
+:root {
+  --bg: #f7f9fc;
+  --card-bg: #fff;
+  --accent: #007bff;
+  --text: #333;
+  --radius: 8px;
+}
+body {
+  margin:0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+.container {
+  width: 360px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  padding: 20px;
+}
+h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+/* —— Pill Toggle —— */
+.segmented {
+  display: flex;
+  background: #e9ecef;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.segmented input { display: none; }
+.segmented label {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s, color 0.3s;
+}
+#hor:checked + label[for="hor"],
+#ver:checked + label[for="ver"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* —— Scroll‑Snap Spinners —— */
+.time-picker {
+  display: flex;
+  gap: 8px;
+}
+.spinner {
+  position: relative;
+  flex: 1;
+  height: 200px;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+}
+.spinner-item {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  font-size: 18px;
+  color: var(--text);
+  transition: color 0.2s, font-weight 0.2s;
+}
+.spinner-item.selected {
+  color: var(--accent);
+  font-weight: bold;
+}
+/* 关键改动：让 mask 的 height 包含 border，保证上下框线都落在预期位置 */
+.spinner-mask {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  width: 100%;
+  border-top: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  box-sizing: border-box;
+}
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 20px;
+}
+.btn-submit:hover {
+  background: #0056b3;
+}
+.components-container{
+    margin-bottom: 20px;
+}
+.component-list {
+      flex: 1;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      
+    }
+    .component-list h3 {
+      margin-top: 0;
+      font-size: 18px;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 8px;
+    }
+    .component-item {
+      padding: 10px 12px;
+      margin: 8px 0;
+      background: #e9ecef;
+      border-radius: 6px;
+      cursor: grab;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .component-item:active {
+      cursor: grabbing;
+      background: #d0d4d8;
+    }
+    #components-choose{
+        display: flex;
+      gap: 20px;
+      
+      width: 100%;
+    }
+
+    #unused-components,#used-components{
+        height: 300px;
+        overflow-y: auto;
+        
+    }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div class="components-container">
+        <h2>相框方向</h2>
+        <div class="segmented">
+        <input type="radio" id="hor" name="orientation" value="horizontal" checked />
+        <label for="hor">横向摆放</label>
+        <input type="radio" id="ver" name="orientation" value="vertical" />
+        <label for="ver">竖向摆放</label>
+        </div>
+    </div>
+
+    <div class="components-container">
+        
+        
+
+        <h2>时间设置</h2>
+        <div class="time-picker">
+        <div class="spinner" id="days"><div class="spinner-mask"></div></div>
+        <div class="spinner" id="hours"><div class="spinner-mask"></div></div>
+        <div class="spinner" id="minutes"><div class="spinner-mask"></div></div>
+        </div>
+        <button class="btn-submit" id="submit-time">提交</button>
+    </div>
+
+
+
+    <div class="components-container" id="components-choose">
+        <!-- 未使用组件区域 -->
+        <div class="component-list" style="width: 50%;">
+            <h3>未使用组件</h3>
+            <div  id="unused-components">
+                
+                <div class="component-item">组件 A</div>
+                <div class="component-item">组件 B</div>
+                <div class="component-item">组件 C</div>
+                <div class="component-item">组件 D</div>
+            </div>
+        </div>
+    
+        <!-- 已使用组件区域 -->
+        <div class="component-list" style="width: 50%;">
+            <h3>已使用组件</h3>
+            <div id="used-components">
+                <!-- 拖入这里就会被激活 -->
+            </div>
+        </div>
+      
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+  <script>
+  (function(){
+    const configs = [
+      { id: 'days',    max: 30, label: '天' },
+      { id: 'hours',   max: 23, label: '时' },
+      { id: 'minutes', max: 59, label: '分' },
+    ];
+    const itemH = 40;
+
+    configs.forEach(cfg => {
+      const sp = document.getElementById(cfg.id);
+      const mask = sp.querySelector('.spinner-mask');
+
+      // 生成选项
+      for (let i = 0; i <= cfg.max; i++) {
+        const item = document.createElement('div');
+        item.className = 'spinner-item';
+        item.textContent = i.toString().padStart(2, '0') + cfg.label;
+        sp.appendChild(item);
+      }
+
+      // 计算并设置 mask 的 top 和 height
+      function alignMask(sp, idx) {
+        const mask = sp.querySelector('.spinner-mask');
+        const itemH = 40;  // 每个项的高度
+        // 计算中间区域的偏移量
+        const centerOffset = 40*idx
+        
+        // 1. 定位 mask 的 top 和 height
+        mask.style.top    = `${centerOffset}px`;
+        mask.style.height = `${itemH}px`;
+      }
+      //alignMask();
+      window.addEventListener('resize', alignMask);
+
+      // 首次对齐到 0，并高亮
+      setTimeout(() => {
+        sp.scrollTop = 0 * itemH - (sp.clientHeight - itemH) / 2;
+        highlight(sp, 2);
+        alignMask(sp,2);
+      }, 0);
+
+      // 停滚后自动对齐并高亮
+      let debounce;
+      sp.addEventListener('scroll', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          const centerOffset = (sp.clientHeight - itemH) / 2;
+          const idx = Math.round((sp.scrollTop + centerOffset) / itemH);
+          sp.scrollTo({ top: idx * itemH - centerOffset, behavior: 'smooth' });
+          highlight(sp, idx);
+          alignMask(sp,idx);
+        }, 100);
+      });
+    });
+
+    function highlight(spinner, idx) {
+      spinner.querySelectorAll('.spinner-item').forEach((it, i) => {
+        it.classList.toggle('selected', i === idx);
+      });
+    }
+
+    // 方向切换
+    document.querySelectorAll('input[name="orientation"]').forEach(inp => {
+      inp.addEventListener('change', e => {
+        console.log('orientation →', e.target.value);
+      });
+    });
+
+    document.getElementById('submit-time').addEventListener('click', async () => {
+      const daysIdx    = parseInt(document.getElementById('days').dataset.selectedIndex, 10);
+      const hoursIdx   = parseInt(document.getElementById('hours').dataset.selectedIndex, 10);
+      const minutesIdx = parseInt(document.getElementById('minutes').dataset.selectedIndex, 10);
+      const orientation= document.querySelector('input[name="orientation"]:checked').value;
+
+      const payload = { orientation, days: daysIdx, hours: hoursIdx, minutes: minutesIdx };
+      console.log('准备发送 →', payload);
+
+      try {
+        const res = await fetch('/api/setTime', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        alert('提交成功！');
+      } catch (err) {
+        console.error(err);
+        alert('提交失败：' + err.message);
+      }
+    });
+
+
+    Sortable.create(document.getElementById('unused-components'), {
+      group: 'components',            // 分组名称相同才能互通
+      animation: 150,                 // 拖拽动画时长
+      ghostClass: 'sortable-ghost',   // 拖拽时的占位样式
+      chosenClass: 'sortable-chosen'
+    });
+
+    Sortable.create(document.getElementById('used-components'), {
+      group: 'components',
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen'
+    });
+
+    // 可选：监听激活事件
+    document.getElementById('used-components').addEventListener('sortupdate', evt => {
+      console.log('已使用组件列表更新：', Array.from(evt.to.children)
+        .filter(el => el.classList.contains('component-item'))
+        .map(el => el.textContent));
+    });
+  })();
+  </script>
+</body>
+</html>

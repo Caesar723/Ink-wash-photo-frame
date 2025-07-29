@@ -1,14 +1,18 @@
 
 import random
-
+import asyncio
 
 
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+if __name__ == "__main__":
+    import sys,os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from webManager.utils.helper import get_class_by_name
 from webManager.utils.baseImageManager import BaseImageManager
 from webManager.utils.baseHookManager import BaseHookManager
+from webManager.utils.helper import read_yaml
 
 
 class BaseImageSelector(BaseHookManager):
@@ -20,8 +24,9 @@ class BaseImageSelector(BaseHookManager):
             get_class_by_name(class_name)(self.config)
             for class_name in self.config["module_used"]
         ]
+        print(self.modules)
         self.scheduler = AsyncIOScheduler()
-        self.scheduler.start()
+        self.start()
 
         
 
@@ -32,8 +37,9 @@ class BaseImageSelector(BaseHookManager):
 
     async def select_image(self):
         module = random.choice(self.modules)
+        print(module)
         image = await module.create_image()  # Await the async function
-
+        print(image)
         await self.baseImageManager.put_image_to_screen(image)
         
 
@@ -43,14 +49,25 @@ class BaseImageSelector(BaseHookManager):
         hours=self.config["image_selector_interval"]["hours"],
         days=self.config["image_selector_interval"]["days"])
 
-        # Add job that runs every 1 hour
-        # self.scheduler.add_job(self.select_image, 'interval', hours=1)
+       
 
-        # # Add job that runs every 1 day
-        # self.scheduler.add_job(self.select_image, 'interval', days=1)
-
+        print(self.scheduler)
         self.scheduler.start()
 
 
     def change_job(self):
         pass
+
+if __name__ == "__main__":
+    config=read_yaml("webManager/config/basic.yaml")
+
+    async def main():
+        baseImageManager=BaseImageManager(config)
+        baseImageSelector=BaseImageSelector(config,baseImageManager)
+
+        while True:
+            await asyncio.sleep(3600)
+           
+
+    asyncio.run(main())
+    

@@ -101,6 +101,18 @@
       opacity:0.8;
     }
 
+    #text-content{
+      font-size: 30px;
+      width: 70%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      letter-spacing: 5px;
+      line-height: 1.5;
+    }
+
     /* 横竖兼容：竖排模式 */
     @media (orientation: portrait) {
       .border-container p { writing-mode: vertical-rl; text-orientation: upright; }
@@ -147,8 +159,7 @@
         <circle cx="60" cy="200" r="14" fill="#ff7bac" />
       </svg>
     </div>
-    <p id="text-content" style="font-size: 30px;">这里是可通过 URL 参数切换的多样化装饰边框示例。</p>
-  </div>
+    <p id="text-content" >中<br>间</p>
   <script>
     // 读取 URL 参数 style，并给容器添加对应类名
     const container = document.getElementById('border-container');

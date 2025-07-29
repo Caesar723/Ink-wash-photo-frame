@@ -17,12 +17,14 @@ class BaseImageManager(BaseHookManager):
         self.config=config
         self.task_queue = asyncio.Queue()
 
+        #self.start_task_worker()
+
     def when_config_change(self,key,value):
         pass
 
         
 
-    def start_task_worker(self):
+    async def start_task_worker(self):
         asyncio.create_task(self.task_worker())
 
 
@@ -62,6 +64,7 @@ class BaseImageManager(BaseHookManager):
 
     async def clear_queue(self):
         while not self.task_queue.empty():
+            print("clear queue")
             await self.task_queue.get()
 
     async def task_worker(self):
@@ -69,7 +72,7 @@ class BaseImageManager(BaseHookManager):
             task_data = await self.task_queue.get()
             
             try:
-                result=await do_task(task_data)
+                await do_task(task_data)
                 #print(result)
             except Exception as e:
                 print(f"任务失败: {e}")
@@ -78,9 +81,13 @@ class BaseImageManager(BaseHookManager):
 
 if __name__ == "__main__":
     async def main():
-        manager = BaseImageManager()
-        manager.start_task_worker()
+        import webManager.utils.helper as helper
+        config=helper.read_yaml("webManager/config/basic.yaml")
+        manager = BaseImageManager(config)
+
         await manager.put_image_to_screen("测试任务")
+
+        await asyncio.sleep(1)
         await manager.put_image_to_screen("测试任务2")
         await asyncio.sleep(20)
 

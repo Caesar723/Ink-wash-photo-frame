@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>控制中心</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- FilePond -->
+  <link href="https://cdn.jsdelivr.net/npm/filepond@^4/dist/filepond.min.css" rel="stylesheet" />
+  <link href="static/css/setting.css" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-blue: #0d6efd;
+      --light-blue: #e7f1fc;
+      --white: #ffffff;
+      --shadow: rgba(0, 0, 0, 0.1);
+      --title-gradient: linear-gradient(90deg, #0d6efd, #6610f2);
+    }
+    html, body { height: 100%; margin: 0; }
+    .console { display: flex; flex-direction: column; height: 100%; }
+    .content { flex: 1; display: flex; overflow: hidden; }
+    /* 侧边栏 */
+    aside {
+      width: 72px;
+      background: var(--light-blue);
+      box-shadow: 2px 0 6px var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0;
+    }
+    aside .nav-btn {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+      border-radius: 50%;
+      border: 2px solid var(--primary-blue);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-blue);
+      transition: background 0.3s, color 0.3s;
+    }
+    aside .nav-btn:hover,
+    aside .nav-btn.active {
+      background: var(--primary-blue);
+      color: var(--white);
+    }
+    aside .nav-btn i { font-size: 1.5rem; }
+    /* 主内容 */
+    main { flex: 1; overflow: auto; background: #fff; position: relative; }
+    /* 标题 */
+    .console-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: var(--title-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pond-wrapper { padding: 2rem; }
+    /* 自定义预览遮罩 */
+    #overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .overlay-img-container {
+      position: relative;
+      width: 65%;
+      max-width: 800px;
+      max-height: 95%;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+    .overlay-img-container img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    /* 黑色渐变底部 */
+    .overlay-gradient {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 16px;
+      box-sizing: border-box;
+    }
+    .overlay-gradient .overlay-confirm {
+      background: var(--white);
+      border: none;
+      border-radius: 50%;
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .overlay-gradient .overlay-confirm:hover {
+      background: #f0f0f0;
+    }
+    .overlay-gradient .overlay-confirm i {
+      color: #333;
+      font-size: 1.75rem;
+    }
+    /* 关闭按钮 */
+    .overlay-close {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(255,255,255,0.8);
+      border: none; border-radius: 50%;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .overlay-close:hover {
+      background: rgba(255,255,255,1);
+    }
+    .overlay-close i { color: #333; font-size: 1.25rem; }
+  </style>
+</head>
+<body>
+  <div class="console">
+    <nav class="navbar navbar-light bg-white shadow-sm">
+      <div class="container-fluid justify-content-center">
+        <span class="console-title"><i class="bi bi-speedometer2"></i> 控制中心</span>
+      </div>
+    </nav>
+    <div class="content">
+      <aside>
+        <button class="nav-btn active" data-target="gallery" title="图片"><i class="bi bi-images"></i></button>
+        <button class="nav-btn" data-target="upload" title="上传"><i class="bi bi-upload"></i></button>
+        <button class="nav-btn" data-target="settings" title="设置"><i class="bi bi-gear"></i></button>
+      </aside>
+      <main>
+        <!-- 图片展示 面板 -->
+        <div id="gallery" class="panel active p-3">
+          <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 h-100 overflow-auto">
+            <div class="col"><img src="https://picsum.photos/400/300?random=1" class="img-fluid rounded shadow-sm gallery-img" /></div>
+            <div class="col"><img src="https://picsum.photos/400/300?random=2" class="img-fluid rounded shadow-sm gallery-img" /></div>
+            <div class="col"><img src="https://source.unsplash.com/random/400x300?sig=1" class="img-fluid rounded shadow-sm gallery-img" /></div>
+            <div class="col"><img src="https://source.unsplash.com/random/400x300?sig=2" class="img-fluid rounded shadow-sm gallery-img" /></div>
+          </div>
+        </div>
+        <!-- 上传 面板 -->
+        <div id="upload" class="panel p-3" style="display:none;">
+          <div class="pond-wrapper">
+            <input type="file" class="filepond" name="filepond" multiple accept="image/*" />
+          </div>
+        </div>
+        <!-- 设置 面板 -->
+        <div id="settings" class="panel p-3" style="display:none;">
+            <div class="container">
+                <div class="components-container">
+                    <h2>相框方向</h2>
+                    <div class="segmented">
+                    <input type="radio" id="hor" name="orientation" value="horizontal" checked />
+                    <label for="hor">横向摆放</label>
+                    <input type="radio" id="ver" name="orientation" value="vertical" />
+                    <label for="ver">竖向摆放</label>
+                    </div>
+                </div>
+            
+                <div class="components-container">
+                    
+                    
+            
+                    <h2>时间设置</h2>
+                    <div class="time-picker">
+                    <div class="spinner" id="days"><div class="spinner-mask"></div></div>
+                    <div class="spinner" id="hours"><div class="spinner-mask"></div></div>
+                    <div class="spinner" id="minutes"><div class="spinner-mask"></div></div>
+                    </div>
+                    <button class="btn-submit" id="submit-time">提交</button>
+                </div>
+            
+            
+            
+                <div class="components-container" id="components-choose">
+                    <!-- 未使用组件区域 -->
+                    <div class="component-list" style="width: 50%;">
+                        <h3>未使用组件</h3>
+                        <div  id="unused-components">
+                            
+                            <div class="component-item">组件 A</div>
+                            <div class="component-item">组件 B</div>
+                            <div class="component-item">组件 C</div>
+                            <div class="component-item">组件 D</div>
+                        </div>
+                    </div>
+                
+                    <!-- 已使用组件区域 -->
+                    <div class="component-list" style="width: 50%;">
+                        <h3>已使用组件</h3>
+                        <div id="used-components">
+                            <!-- 拖入这里就会被激活 -->
+                        </div>
+                    </div>
+                </div>
+                  
+              </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Overlay -->
+  <div id="overlay">
+    <div class="overlay-img-container">
+      <img id="overlay-img" src="" alt="预览" />
+      <div class="overlay-gradient">
+        <button class="overlay-confirm" title="使用图片"><i class="bi bi-check-circle-fill"></i></button>
+      </div>
+      <button class="overlay-close" title="关闭预览"><i class="bi bi-x-lg"></i></button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/filepond@^4/dist/filepond.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="static/js/setting.js"></script>
+  <script>
+    // 导航切换
+    const navBtns = document.querySelectorAll('aside .nav-btn');
+    const panels = document.querySelectorAll('.panel');
+    navBtns.forEach(btn => btn.addEventListener('click', () => {
+      navBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      panels.forEach(p => p.id === btn.dataset.target ? p.style.display = 'block' : p.style.display = 'none');
+    }));
+    // FilePond 初始化
+    FilePond.registerPlugin();
+    FilePond.create(document.querySelector('.filepond'), { labelIdle: '拖拽或点击上传 图片' });
+    // 图片预览 Overlay
+    const overlay = document.getElementById('overlay');
+    const overlayImg = document.getElementById('overlay-img');
+    const closeBtn = document.querySelector('.overlay-close');
+    const confirmBtn = document.querySelector('.overlay-confirm');
+    document.querySelectorAll('.gallery-img').forEach(img => {
+      img.addEventListener('click', () => {
+        overlayImg.src = img.src;
+        overlay.style.display = 'flex';
+      });
+    });
+    closeBtn.addEventListener('click', () => overlay.style.display = 'none');
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.style.display = 'none'; });
+    confirmBtn.addEventListener('click', () => {
+      console.log('发送图片:', overlayImg.src);
+      overlay.style.display = 'none';
+      // TODO: 在此处添加发送逻辑
+    });
+  </script>
+</body>
+</html>

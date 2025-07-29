@@ -25,7 +25,6 @@ def get_router(appServer:"AppServer") -> APIRouter:
     
 
     
-
     @router.get("/whether")
     async def whether(request: Request):
         city = appServer.config["whether_city"]
@@ -53,6 +52,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
 
     @router.get("/")
     async def index(request: Request):
+        print("index")
         return FileResponse("webManager/template/home.html")
 
 

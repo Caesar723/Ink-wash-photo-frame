@@ -6,8 +6,9 @@ from io import BytesIO
 from playwright.async_api import async_playwright
 from datetime import datetime
 from urllib.parse import urlencode
+import os
 if __name__ == "__main__":
-    import sys,os
+    import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from webManager.utils.helper import read_yaml
 from webManager.utils.baseImageCreator import BaseImageCreator
