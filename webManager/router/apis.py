@@ -17,29 +17,35 @@ def get_router(appServer:"AppServer") -> APIRouter:
 
     
 
-    @router.post("/getconfig")
-    async def getconfig(request: Request):
-        pass
 
-
-    @router.post("/getfolderpaths")
-    async def getconfig_folderpaths(request: Request):
+    @router.post("/get_img_index")
+    async def get_img_index(request: Request):
         pass
 
 
 
 
     
-    @router.post("/evalimage")
-    async def evalimage(file: UploadFile = File(...)):
-        file_content = await file.read()
-
-        
-        np_array = np.frombuffer(file_content, np.uint8)
-
-        
+    @router.post("/use_image")
+    async def use_image(request: Request):
+        pass 
        
 
+    @router.post("/change_place_mode")
+    async def change_place_mode(request: Request):
+        pass 
+       
+
+    @router.post("/set_time_gap")
+    async def set_time_gap(request: Request):
+        pass 
+
+
+
+    @router.post("/set_module_list")
+    async def set_module_list(request: Request):
+        pass
+       
 
    
 

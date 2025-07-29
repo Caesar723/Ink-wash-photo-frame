@@ -1,4 +1,14 @@
+
+:root {
+    --bg: #f7f9fc;
+    --card-bg: #fff;
+    --accent: #007bff;
+    --text: #333;
+    --radius: 8px;
+  }
+
 .container {
+    max-width: 600px;
     background: var(--card-bg);
     border-radius: var(--radius);
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);

@@ -9,12 +9,25 @@ const configs = [
     const sp = document.getElementById(cfg.id);
     const mask = sp.querySelector('.spinner-mask');
 
+    for (let i = 0; i < 2; i++) {
+        const topPad = document.createElement('div');
+        topPad.className = 'spinner-item';
+        topPad.style.height = itemH + 'px';
+        sp.appendChild(topPad);
+    }
+
     // 生成选项
     for (let i = 0; i <= cfg.max; i++) {
       const item = document.createElement('div');
       item.className = 'spinner-item';
       item.textContent = i.toString().padStart(2, '0') + cfg.label;
       sp.appendChild(item);
+    }
+    for (let i = 0; i < 2; i++) {
+        const bottomPad = document.createElement('div');
+        bottomPad.className = 'spinner-item';
+        bottomPad.style.height = itemH + 'px';
+        sp.appendChild(bottomPad);
     }
 
     // 计算并设置 mask 的 top 和 height
