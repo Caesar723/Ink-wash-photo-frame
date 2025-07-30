@@ -14,3 +14,5 @@ httpx
 aiohttp
 apscheduler
 opencv-python
+playwright
+aiofiles

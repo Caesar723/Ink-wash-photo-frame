@@ -27,6 +27,13 @@ rm -rf wiringpi-2.61-1-arm64.deb
 python3 -m venv myenv
 source ~/myenv/bin/activate
 
+
+# deb https://mirrors.tuna.tsinghua.edu.cn/debian bookworm main contrib non-free
+# deb https://mirrors.tuna.tsinghua.edu.cn/debian bookworm-updates main contrib non-free
+# deb https://mirrors.tuna.tsinghua.edu.cn/debian-security bookworm-security main contrib non-free
+sudo apt-get update
+sudo apt-get install -y libgtk-4-1 libgraphene-1.0-0
+
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip3 install playwright -i https://pypi.tuna.tsinghua.edu.cn/simple
 playwright install
