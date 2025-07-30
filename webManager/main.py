@@ -10,6 +10,11 @@ import uvicorn
 
 if __name__ == "__main__":
     import sys,os
+    libdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'lib')
+    print(libdir)
+    if os.path.exists(libdir):
+        print("libdir exists")
+        sys.path.append(libdir)
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from webManager.utils.baseImageManager import BaseImageManager
 from webManager.utils.baseImageSelector import BaseImageSelector
