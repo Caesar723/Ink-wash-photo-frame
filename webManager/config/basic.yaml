@@ -9,7 +9,7 @@ chat_model: Doubao-1.5-lite-32k
 image_selector_interval:
   days: 0
   hours: 0
-  minutes: 1
+  minutes: 5
 module_dict:
   "AI\u4F5C\u8BCD": webManager.module.chatApi.ChatApi
   "\u5929\u6C14\u9884\u62A5": webManager.module.whetherReport.BaseWhetherReport

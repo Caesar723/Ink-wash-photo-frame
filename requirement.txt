@@ -13,3 +13,4 @@ openai
 httpx
 aiohttp
 apscheduler
+opencv-python

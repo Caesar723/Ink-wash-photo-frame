@@ -40,22 +40,20 @@ class BaseImageSelector(BaseHookManager):
     
 
     async def select_image(self):
-        module = random.choice(list(self.modules.values()))
-        print(module)
+        module = random.choice(self.modules)
+        
         image = await module.create_image()  # Await the async function
-        print(image)
+        
         await self.baseImageManager.put_image_to_screen(image)
         
 
     def start(self):
-        # self.scheduler.add_job(self.select_image, 'interval', 
-        # minutes=self.config["image_selector_interval"]["minutes"],
-        # hours=self.config["image_selector_interval"]["hours"],
-        # days=self.config["image_selector_interval"]["days"])
+        self.scheduler.add_job(self.select_image, 'interval', 
+        minutes=self.config["image_selector_interval"]["minutes"],
+        hours=self.config["image_selector_interval"]["hours"],
+        days=self.config["image_selector_interval"]["days"])
 
        
-
-        print(self.scheduler)
         self.scheduler.start()
 
 
