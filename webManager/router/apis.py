@@ -161,14 +161,14 @@ def get_router(appServer:"AppServer") -> APIRouter:
 
         baseImageSelector=appServer.baseImageSelector
 
-        baseImageSelector.modules={
+        baseImageSelector.modules=[
             baseImageSelector.total_modules[class_name]
             for class_name in module_list
-        }
+        ]
 
         appServer.config["module_used"]=module_list
         
-        print(module_list)
+        
         return {"status":"success"}
 
 

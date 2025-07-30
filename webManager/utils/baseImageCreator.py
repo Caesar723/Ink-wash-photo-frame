@@ -72,23 +72,24 @@ class BaseImageCreator(BaseHookManager):
 
 
     async def url_to_image(self,url: str):
-        print(self)
+        #print(self)
         async with async_playwright() as p:
             browser = await p.chromium.launch()
             context = await browser.new_context(
-                viewport={"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]}
+                viewport={"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]},
+                device_scale_factor=1,
             )
-            print({"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]})
+            #print({"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]})
             page = await context.new_page()
             
             await page.goto(url, wait_until="networkidle")
             await page.wait_for_timeout(1000)
-            image_bytes = await page.screenshot(full_page=True)
+            image_bytes = await page.screenshot()
             await browser.close()
 
             image = Image.open(BytesIO(image_bytes))
 
-        image.show()
+        #image.show()
         return image
 
 
