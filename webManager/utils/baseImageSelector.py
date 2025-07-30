@@ -20,8 +20,12 @@ class BaseImageSelector(BaseHookManager):
         super().__init__()
         self.config=config
         self.baseImageManager=baseImageManager
+        self.total_modules={
+            class_name:get_class_by_name(self.config["module_dict"][class_name])(self.config)
+            for class_name in self.config["module_dict"]
+        }
         self.modules=[
-            get_class_by_name(class_name)(self.config)
+            self.total_modules[class_name]
             for class_name in self.config["module_used"]
         ]
         print(self.modules)
@@ -36,7 +40,7 @@ class BaseImageSelector(BaseHookManager):
     
 
     async def select_image(self):
-        module = random.choice(self.modules)
+        module = random.choice(list(self.modules.values()))
         print(module)
         image = await module.create_image()  # Await the async function
         print(image)

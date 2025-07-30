@@ -108,7 +108,7 @@
             { type:'line', label:'温度 (℃)', data:temps, borderColor:'orange', backgroundColor:'transparent', borderWidth:2, tension:0.3 },
             { type:'bar', label:'降水量 (mm)', data:rains, backgroundColor:'rgba(0,123,255,0.6)', datalabels:{anchor:'end',align:'end',formatter:v=>v} }
           ]},
-          options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'top'}, datalabels:{font:{size:10}}}, scales:{ y:{ beginAtZero:false } } }
+          options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'top'}, datalabels:{font:{size:15}}}, scales:{ y:{ beginAtZero:false } } }
         });
         // 日预报：按日期聚合，取最大最小
         const daily = {};

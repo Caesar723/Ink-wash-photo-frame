@@ -1,0 +1,137 @@
+:root {
+    --primary-blue: #0d6efd;
+    --light-blue: #e7f1fc;
+    --white: #ffffff;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --title-gradient: linear-gradient(90deg, #0d6efd, #6610f2);
+  }
+  html, body { height: 100%; margin: 0; }
+  .console { display: flex; flex-direction: column; height: 100%; }
+  .content { flex: 1; display: flex; overflow: hidden; }
+  /* 侧边栏 */
+  aside {
+    width: 72px;
+    background: var(--light-blue);
+    box-shadow: 2px 0 6px var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 0;
+  }
+  aside .nav-btn {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    border: 2px solid var(--primary-blue);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-blue);
+    transition: background 0.3s, color 0.3s;
+  }
+  aside .nav-btn:hover,
+  aside .nav-btn.active {
+    background: var(--primary-blue);
+    color: var(--white);
+  }
+  aside .nav-btn i { font-size: 1.5rem; }
+  /* 主内容 */
+  main { flex: 1; overflow: auto; background: #fff; position: relative; }
+  /* 标题 */
+  .console-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: var(--title-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .pond-wrapper { padding: 2rem; }
+  /* 自定义预览遮罩 */
+  #overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  .overlay-img-container {
+    position: relative;
+    width: 65%;
+    max-width: 800px;
+    max-height: 95%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #000;
+  }
+  .overlay-img-container img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  /* 黑色渐变底部 */
+  .overlay-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 16px;
+    gap: 100px;
+    box-sizing: border-box;
+  }
+  .overlay-gradient .overlay-confirm,
+  .overlay-gradient .overlay-delete {
+    background: var(--white);
+    border: none;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .overlay-gradient .overlay-confirm:hover,
+  .overlay-gradient .overlay-delete:hover {
+    background: #f0f0f0;
+  }
+  .overlay-gradient .overlay-confirm i,
+  .overlay-gradient .overlay-delete i {
+    color: #333;
+    font-size: 1.75rem;
+  }
+  /* 关闭按钮 */
+  .overlay-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: rgba(255,255,255,0.8);
+    border: none; border-radius: 50%;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .overlay-close:hover {
+    background: rgba(255,255,255,1);
+  }
+  .overlay-close i { color: #333; font-size: 1.25rem; }
+
+  
+  .overlay-delete.armed {
+      background: rgba(220, 53, 70, 0.535); 
+      color: #ff4d4f;
+  }
+  .overlay-gradient .armed:hover {
+    background: #ff2c2cb0;
+  }

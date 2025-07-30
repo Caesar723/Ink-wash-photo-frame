@@ -141,3 +141,21 @@
           overflow-y: auto;
           
       }
+
+        /* —— Select/Input —— */
+  select, input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    color: var(--text);
+    outline: none;
+    font-size: 14px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  select:focus, input[type="text"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,123,255,.15);
+  }
+  select:disabled, input:disabled { opacity: .6; cursor: not-allowed; }

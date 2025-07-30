@@ -27,11 +27,15 @@ whether_api_token: "f077afc158a17acaef193a6f67b0f5d3"
 whether_city: "Shanghai,cn"
 
 
-
+module_dict:
+  天气预报: "webManager.module.whetherReport.BaseWhetherReport"
+  普通展示: "webManager.module.imageReader.ImageReader"
+  AI作词: "webManager.module.chatApi.ChatApi"
+  
 module_used:
-  - "webManager.module.imageReader.ImageReader"
-  - "webManager.module.whetherReport.BaseWhetherReport"
-  - "webManager.module.chatApi.ChatApi"
+  - "AI作词"
+  - "普通展示"
+  - "天气预报"
 
 
 image_selector_interval:

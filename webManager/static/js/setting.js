@@ -40,9 +40,10 @@ const configs = [
       // 1. 定位 mask 的 top 和 height
       mask.style.top    = `${centerOffset}px`;
       mask.style.height = `${itemH}px`;
+      mask.dataset.selectedIndex=idx-2;
     }
     //alignMask();
-    window.addEventListener('resize', alignMask);
+    //window.addEventListener('resize', alignMask);
 
     // 首次对齐到 0，并高亮
     setTimeout(() => {
@@ -73,18 +74,23 @@ const configs = [
 
   // 方向切换
   document.querySelectorAll('input[name="orientation"]').forEach(inp => {
-    inp.addEventListener('change', e => {
-      console.log('orientation →', e.target.value);
+    inp.addEventListener('change', async (e) => {
+        const status=await requestSender.change_place_mode(e.target.value);
+        if(status=="success"){
+            console.log("切换模式成功");
+        }else{
+            console.log("切换模式失败");
+        }
     });
   });
 
   document.getElementById('submit-time').addEventListener('click', async () => {
-    const daysIdx    = parseInt(document.getElementById('days').dataset.selectedIndex, 10);
-    const hoursIdx   = parseInt(document.getElementById('hours').dataset.selectedIndex, 10);
-    const minutesIdx = parseInt(document.getElementById('minutes').dataset.selectedIndex, 10);
-    const orientation= document.querySelector('input[name="orientation"]:checked').value;
+    const daysIdx    = parseInt(document.getElementById('days').querySelector('.spinner-mask').dataset.selectedIndex, 10);
+    const hoursIdx   = parseInt(document.getElementById('hours').querySelector('.spinner-mask').dataset.selectedIndex, 10);
+    const minutesIdx = parseInt(document.getElementById('minutes').querySelector('.spinner-mask').dataset.selectedIndex, 10);
+    
 
-    const payload = { orientation, days: daysIdx, hours: hoursIdx, minutes: minutesIdx };
+    const payload = {  days: daysIdx, hours: hoursIdx, minutes: minutesIdx };
     console.log('准备发送 →', payload);
 
     try {
@@ -102,6 +108,32 @@ const configs = [
   });
 
 
+  async function init_module_list(){
+    const response=await requestSender.get_module_list();
+    console.log(response);
+
+    const unused_components=document.getElementById('unused-components');
+    const used_components=document.getElementById('used-components');
+
+    response.module_list.forEach(module=>{
+      const item=document.createElement('div');
+      item.className='component-item';
+      item.textContent=module;
+      used_components.appendChild(item);
+    });
+
+    const unused_module_list=response.total_module_list.filter(module=>!response.module_list.includes(module));
+
+    unused_module_list.forEach(module=>{
+      const item=document.createElement('div');
+      item.className='component-item';
+      item.textContent=module;
+      unused_components.appendChild(item);
+    });
+  }
+  init_module_list();
+
+
   Sortable.create(document.getElementById('unused-components'), {
     group: 'components',            // 分组名称相同才能互通
     animation: 150,                 // 拖拽动画时长
@@ -109,12 +141,35 @@ const configs = [
     chosenClass: 'sortable-chosen'
   });
 
+
+  async function set_module_list(){
+    const used_components=document.getElementById('used-components');
+    const items = Array.from(used_components.querySelectorAll('.component-item'));
+    const order = items.map(el => el.textContent);
+    const status=await requestSender.set_module_list(order);
+    if(status=="success"){
+        console.log("设置模块列表成功");
+    }else{
+        console.log("设置模块列表失败");
+    }
+  }
+
   Sortable.create(document.getElementById('used-components'), {
     group: 'components',
     animation: 150,
     ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen'
+    chosenClass: 'sortable-chosen',
+    onAdd(evt) {
+        set_module_list();
+
+    },
+    onRemove(evt) {
+        set_module_list();
+        
+    }
   });
+
+  
 
   // 可选：监听激活事件
   document.getElementById('used-components').addEventListener('sortupdate', evt => {
