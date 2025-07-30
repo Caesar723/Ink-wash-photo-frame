@@ -25,7 +25,7 @@ rm -rf wiringpi-2.61-1-arm64.deb
 
 
 python3 -m venv myenv
-source myenv/bin/activate
+source ~/myenv/bin/activate
 
 pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip3 install playwright -i https://pypi.tuna.tsinghua.edu.cn/simple

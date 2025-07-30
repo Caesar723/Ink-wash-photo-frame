@@ -29,7 +29,7 @@
 #
 
 import logging
-from lib.epdconfig import epdconfig
+from webManager.lib.epdconfig import epdconfig
 
 import PIL
 from PIL import Image
