@@ -10,12 +10,17 @@ from webManager.utils.helper import do_task,task_wrapper
 
 
 from webManager.utils.baseHookManager import BaseHookManager
+from webManager.lib.epd7in3f import EPD
+
 
 class BaseImageManager(BaseHookManager):
     def __init__(self,config):
         super().__init__()
         self.config=config
         self.task_queue = asyncio.Queue()
+        self.epd = EPD()   
+        self.epd.init()
+        #self.epd.Clear()
 
         #self.start_task_worker()
 
@@ -55,11 +60,11 @@ class BaseImageManager(BaseHookManager):
     def show_image(self,image):
         print("show image")
         print(image)
-        time.sleep(3)
+        self.epd.display(self.epd.getbuffer(image))
 
     def clear_image(self):
         print("clear image")
-        
+        self.epd.Clear()
         time.sleep(3)
 
     async def clear_queue(self):
