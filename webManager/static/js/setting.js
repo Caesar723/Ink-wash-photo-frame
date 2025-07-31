@@ -177,3 +177,12 @@ const configs = [
       .filter(el => el.classList.contains('component-item'))
       .map(el => el.textContent));
   });
+
+  document.getElementById('change-image').addEventListener('click', async () => {
+    const status=await requestSender.change_image();
+    if(status=="success"){
+        console.log("更换图片成功");
+    }else{
+        console.log("更换图片失败");
+    }
+  });

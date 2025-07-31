@@ -40,6 +40,15 @@ def get_router(appServer:"AppServer") -> APIRouter:
             }
         )
 
+    @router.get("/whetherSimple")
+    async def whetherSimple(request: Request):
+        return appServer.templates.TemplateResponse(
+            "simpleWhether.html", 
+            {
+            "request": request,
+            }
+        )
+
     @router.get("/text")
     async def text(request: Request):
         return appServer.templates.TemplateResponse(

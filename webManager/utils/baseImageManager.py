@@ -3,14 +3,16 @@ import time
 import os
 import cv2
 from PIL import Image
+
+test=0
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from webManager.utils.helper import do_task,task_wrapper
-
-
 from webManager.utils.baseHookManager import BaseHookManager
-from webManager.lib.epd7in3f import EPD
+
+if test==0:
+    from webManager.lib.epd7in3f import EPD
 
 
 class BaseImageManager(BaseHookManager):
@@ -18,8 +20,9 @@ class BaseImageManager(BaseHookManager):
         super().__init__()
         self.config=config
         self.task_queue = asyncio.Queue()
-        self.epd = EPD()   
-        self.epd.init()
+        if test==0:
+            self.epd = EPD()   
+            self.epd.init()
         #self.epd.Clear()
 
         #self.start_task_worker()
@@ -51,7 +54,6 @@ class BaseImageManager(BaseHookManager):
 
     async def put_image_to_screen(self,image):
         task=self.put_task(image)
-
         await self.clear_queue()
         
         await self.task_queue.put(task)
@@ -60,12 +62,14 @@ class BaseImageManager(BaseHookManager):
     def show_image(self,image):
         print("show image")
         print(image)
-        self.epd.display(self.epd.getbuffer(image))
+        if test==0:
+            self.epd.display(self.epd.getbuffer(image))
 
     def clear_image(self):
         print("clear image")
-        self.epd.Clear()
-        time.sleep(3)
+        if test==0:
+            self.epd.Clear()
+        #time.sleep(3)
 
     async def clear_queue(self):
         while not self.task_queue.empty():

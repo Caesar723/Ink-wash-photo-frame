@@ -49,6 +49,7 @@ class BaseImageSelector(BaseHookManager):
 
     def start(self):
         self.scheduler.add_job(self.select_image, 'interval', 
+        id='select_image_job',
         minutes=self.config["image_selector_interval"]["minutes"],
         hours=self.config["image_selector_interval"]["hours"],
         days=self.config["image_selector_interval"]["days"])

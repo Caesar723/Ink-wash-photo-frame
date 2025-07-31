@@ -130,6 +130,13 @@ def get_router(appServer:"AppServer") -> APIRouter:
         data=await request.json()
         mode=data["mode"]
         print(mode)
+
+        if mode=="horizontal":
+            appServer.config["target_img_size"]= [800, 480]
+        elif mode=="vertical":
+            appServer.config["target_img_size"]=[480,800]
+        
+        
         return {"status":"success"}
        
 
@@ -140,6 +147,16 @@ def get_router(appServer:"AppServer") -> APIRouter:
         days=data["days"]
         hours=data["hours"]
         minutes=data["minutes"]
+        appServer.config["image_selector_interval"]={"days":days,"hours":hours,"minutes":minutes}
+
+        appServer.baseImageSelector.scheduler.reschedule_job(
+            'select_image_job',
+            trigger='interval',
+            days=days,
+            hours=hours,
+            minutes=minutes,
+            # 也可以加 seconds、weeks 等
+        )
         
         print(days,hours,minutes)
         return {"status":"success"}
@@ -177,6 +194,14 @@ def get_router(appServer:"AppServer") -> APIRouter:
         data=await request.json()
         city=data["city"]
         print(city)
+        appServer.config["whether_city"]=city
+        return {"status":"success"}
+
+
+
+    @router.post("/change_image")
+    async def change_image(request: Request):
+        await appServer.baseImageSelector.select_image()
         return {"status":"success"}
        
 

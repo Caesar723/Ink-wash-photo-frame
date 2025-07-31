@@ -135,3 +135,8 @@
   .overlay-gradient .armed:hover {
     background: #ff2c2cb0;
   }
+
+  #change-image{
+    margin-bottom: 30px;
+    padding: 10px;
+  }

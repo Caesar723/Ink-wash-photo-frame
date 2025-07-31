@@ -24,6 +24,7 @@ class ImageReader(BaseImageCreator):
         image_path=os.path.join(self.config["basic_image_path"],self.image_path)
         image=self._read_pil(image_path)
 
+        
         return image
 
 
@@ -34,8 +35,9 @@ if __name__ == "__main__":
         print(sys.path)
         config=read_yaml("webManager/config/basic.yaml")
         image_reader=ImageReader(config)
-        image=await image_reader.create_image()
+        data=await image_reader.fetch_weather_and_forecast_async()
+        print(data)
 
-        image.show()
+        
 
     asyncio.run(main())

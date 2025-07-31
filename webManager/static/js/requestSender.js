@@ -76,6 +76,11 @@ class RequestSender{
         const response = await this.send_request("set_city",send_data);
         return response.status;
     }
+
+    async change_image(){
+        const response = await this.send_request("change_image");
+        return response.status;
+    }
 }
 
 const requestSender = new RequestSender();

@@ -29,16 +29,21 @@ whether_city: "Shanghai,cn"
 
 module_dict:
   天气预报: "webManager.module.whetherReport.BaseWhetherReport"
-  普通展示: "webManager.module.imageReader.ImageReader"
+  简单天气: "webManager.module.simpleWhetherReport.SimpleWhetherReport"
+  普通展示_填充: "webManager.module.imageReader.ImageReader"
+  普通展示_裁剪: "webManager.module.imageReaderCrop.ImageReaderCrop"
   AI作词: "webManager.module.chatApi.ChatApi"
-  
+
+
 module_used:
   - "AI作词"
-  - "普通展示"
+  - "普通展示_填充"
+  - "普通展示_裁剪"
   - "天气预报"
+  - "简单天气"
 
 
 image_selector_interval:
-  minutes: 1
+  minutes: 5
   hours: 0
   days: 0

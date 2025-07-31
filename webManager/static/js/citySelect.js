@@ -85,9 +85,9 @@ $select_city.addEventListener('click',async ()=>{
     $rQ.textContent       = q;
     const status=await requestSender.set_city(q);
     if(status=="success"){
-        alert("选择城市成功");
+        console.log("选择城市成功");
     }else{
-        alert("选择城市失败");
+        console.log("选择城市失败");
     }
 });
 

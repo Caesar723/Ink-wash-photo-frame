@@ -30,9 +30,10 @@
       <main>
         <!-- 图片展示 面板 -->
         <div id="gallery" class="panel active p-3">
-          <div id="gallery-container" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 h-100 overflow-auto">
-            
-          </div>
+            <button class="btn-submit" id="change-image">换一张图片</button>
+            <div id="gallery-container" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 h-100 overflow-auto">
+                
+            </div>
         </div>
         <!-- 上传 面板 -->
         <div id="upload" class="panel p-3" style="display:none;">
@@ -175,7 +176,7 @@
 
     FilePond.registerPlugin(
         FilePondPluginFileValidateType,
-        FilePondPluginImagePreview
+        FilePondPluginImagePreview,
     );
 
     FilePond.create(document.querySelector('.filepond'), {

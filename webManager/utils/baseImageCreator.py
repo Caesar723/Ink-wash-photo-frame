@@ -4,6 +4,10 @@ from openai import AsyncOpenAI
 import random
 from playwright.async_api import async_playwright
 from io import BytesIO
+import httpx
+import asyncio
+from datetime import datetime
+
 
 from webManager.utils.baseHookManager import BaseHookManager
 
@@ -18,15 +22,17 @@ class BaseImageCreator(BaseHookManager):
             
         )
         
-    async def get_chat_response(self):
+    async def get_chat_response(self,extra=None):
         
-        message=self.get_chat_prompt()
+        message=self.get_chat_prompt(extra)
+        print(message)
         response = await self.client.chat.completions.create(
             model=self.config["chat_model"],
             messages=message,
             temperature=1.0,
         )
         content=response.choices[0].message.content
+        print(content)
         
         return content
 
@@ -67,6 +73,7 @@ class BaseImageCreator(BaseHookManager):
         if not os.path.exists(image_path):
             return Image.new("RGB", self.config["target_img_size"], (255, 255, 255))
         img = Image.open(image_path)
+        img=ImageOps.exif_transpose(img)
         img=self.image_preprocess(img)
         return img
 
@@ -92,5 +99,67 @@ class BaseImageCreator(BaseHookManager):
         #image.show()
         return image
 
+    def image_final_process(self,image):
+        pass
 
-    
+
+
+    async def fetch_weather_and_forecast_async(self, timeout: float = 10.0):
+
+        api_key=self.config["whether_api_token"]
+        city_name=self.config["whether_city"]
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            # 1. 地理编码
+            geo_resp = await client.get(
+                "https://api.openweathermap.org/geo/1.0/direct",
+                params={"q": city_name, "limit": 1, "appid": api_key}
+            )
+            geo_resp.raise_for_status()
+            loc = geo_resp.json()
+            if not loc:
+                raise ValueError("未找到城市")
+            loc0 = loc[0]
+            lat = loc0["lat"]
+            lon = loc0["lon"]
+            resolved_name = loc0.get("name", city_name)
+
+            # 2. 并发获取当前天气和预报
+            weather_url = "https://api.openweathermap.org/data/2.5/weather"
+            forecast_url = "https://api.openweathermap.org/data/2.5/forecast"
+            tasks = [
+                client.get(weather_url, params={
+                    "lat": lat,
+                    "lon": lon,
+                    "units": "metric",
+                    "appid": api_key
+                }),
+                client.get(forecast_url, params={
+                    "lat": lat,
+                    "lon": lon,
+                    "units": "metric",
+                    "appid": api_key
+                }),
+            ]
+            weather_resp, forecast_resp = await asyncio.gather(*tasks)
+            weather_resp.raise_for_status()
+            forecast_resp.raise_for_status()
+            current = weather_resp.json()
+            forecast = forecast_resp.json()
+
+            date_str = self.format_date(datetime.now())
+
+            return {
+                "city": resolved_name,
+                "date": date_str,
+                "current": current,
+                "forecast": forecast,
+            }
+
+    def format_date(self,dt: datetime) -> str:
+        WEEKDAYS = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+        MONTHS = ["一月", "二月", "三月", "四月", "五月", "六月",
+                "七月", "八月", "九月", "十月", "十一月", "十二月"]
+        return f"{WEEKDAYS[dt.weekday()]} {MONTHS[dt.month-1]} {dt.day}"
+
+
+
