@@ -39,6 +39,12 @@ class BaseImageCreator(BaseHookManager):
     def when_config_change(self,key,value):
         pass
 
+
+    async def create_image_whole_process(self):
+        image=await self.create_image()
+        image=self.image_final_process(image)
+        return image
+
     async def create_image(self):
         pass
 
@@ -100,7 +106,11 @@ class BaseImageCreator(BaseHookManager):
         return image
 
     def image_final_process(self,image):
-        pass
+        if self.config["target_img_size"][0]==800:
+            image= image.rotate(180)
+        else:
+            image= image.rotate(90)
+        return image
 
 
 

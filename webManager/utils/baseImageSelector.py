@@ -42,7 +42,7 @@ class BaseImageSelector(BaseHookManager):
     async def select_image(self):
         module = random.choice(self.modules)
         
-        image = await module.create_image()  # Await the async function
+        image = await module.create_image_whole_process()  # Await the async function
         
         await self.baseImageManager.put_image_to_screen(image)
         

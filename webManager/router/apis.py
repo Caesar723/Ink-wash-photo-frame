@@ -107,6 +107,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
         if os.path.exists(image_path):
             image=Image.open(image_path)
             image=appServer.baseImageCreator.image_preprocess(image)
+            image=appServer.baseImageCreator.image_final_process(image)
             await appServer.baseImageManager.put_image_to_screen(image)
 
             return {"status":"success"}
