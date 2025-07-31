@@ -91,7 +91,7 @@ class BaseImageCreator(BaseHookManager):
             
             await page.goto(url, wait_until="networkidle")
             await page.wait_for_timeout(1000)
-            image_bytes = await page.screenshot()
+            image_bytes = await page.screenshot(timeout=120_000)
             await browser.close()
 
             image = Image.open(BytesIO(image_bytes))
