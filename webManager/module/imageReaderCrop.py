@@ -28,9 +28,9 @@ class ImageReaderCrop(BaseImageCreator):
         return image
     def image_final_process(self,image):
         if self.config["target_img_size"][0]==800:
-            image= image.rotate(180, expand=True)
+            image= image.rotate(-90, expand=True)
         else:
-            image= image.rotate(90, expand=True)
+            image= image.rotate(180, expand=True)
         return image
 
     def image_preprocess(self, image, mode: str = "center", upscale: bool = True):

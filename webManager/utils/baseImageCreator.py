@@ -79,9 +79,11 @@ class BaseImageCreator(BaseHookManager):
         return path
 
     def image_preprocess(self,image):
+        #image.show()
+        print(image.size)
         # 原始尺寸
         original_width, original_height = image.size
-        target_width, target_height = self.config["target_img_size"]
+        target_width, target_height = self.config["target_img_size"][1],self.config["target_img_size"][0]
 
         # 缩放比例（保持宽高比）
         ratio = min(target_width / original_width, target_height / original_height)
@@ -96,6 +98,7 @@ class BaseImageCreator(BaseHookManager):
         padding = (delta_w // 2, delta_h // 2, delta_w - delta_w // 2, delta_h - delta_h // 2)
 
         # 扩张到目标大小
+        print(resized_img.mode)
         image = ImageOps.expand(resized_img, padding, fill=(0, 0, 0))
         return image
 
@@ -133,9 +136,9 @@ class BaseImageCreator(BaseHookManager):
 
     def image_final_process(self,image):
         if self.config["target_img_size"][0]==800:
-            image= image.rotate(180, expand=True)
-        else:
             image= image.rotate(-90, expand=True)
+        else:
+            image= image.rotate(180, expand=True)
         return image
 
 

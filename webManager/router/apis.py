@@ -10,7 +10,7 @@ import aiofiles
 import aiofiles.os as aos
 import os
 import uuid
-from PIL import Image
+from PIL import Image,ImageOps
 
 
 if TYPE_CHECKING:
@@ -106,6 +106,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
         image_path=os.path.join(UPLOAD_DIR,index)
         if os.path.exists(image_path):
             image=Image.open(image_path)
+            image=ImageOps.exif_transpose(image)
             image=appServer.baseImageCreator.image_preprocess(image)
             image=appServer.baseImageCreator.image_final_process(image)
             await appServer.baseImageManager.put_image_to_screen(image)

@@ -29,9 +29,9 @@ class ImageReader(BaseImageCreator):
 
     def image_final_process(self,image):
         if self.config["target_img_size"][0]==800:
-            image= image.rotate(180, expand=True)
+            image= image.rotate(-90, expand=True)
         else:
-            image= image.rotate(90, expand=True)
+            image= image.rotate(180, expand=True)
         return image
 
 
