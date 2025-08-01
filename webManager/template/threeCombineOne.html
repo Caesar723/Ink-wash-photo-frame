@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>高雅天气画面 + 紧凑温度小图标</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; background:#000; overflow:hidden; }
+    body { font-family: system-ui,-apple-system,BlinkMacSystemFont,sans-serif; }
+    .wrapper {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    /* 底部 1/4 从下往上线性黑色渐变（底部最深 -> 向上淡出） */
+    .wrapper::before {
+      content:'';
+      position:absolute;
+      bottom:0;
+      left:0;
+      width:150%;
+      height:25%;
+      background: linear-gradient(to top,
+        rgba(0,0,0,0.9) 0%,
+        rgba(0,0,0,0) 100%);
+      pointer-events:none;
+      transform:translateX(-10%);
+      z-index:1;
+    }
+    /* 轻微纹理 */
+    .wrapper::after {
+      content:'';
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23f)" /></svg>') repeat;
+      opacity:0.018;
+      z-index:2;
+    }
+
+    .color-gradient {
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background: linear-gradient(135deg,
+        rgba(255, 220, 200, 0.06) 0%,
+        rgba(35, 40, 65, 0.08) 55%,
+        rgba(10, 10, 20, 0.12) 100%);
+      mix-blend-mode: overlay;
+      z-index:3;
+    }
+
+    #bg-img {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:center;
+      user-select:none;
+      pointer-events:none;
+      background:#111;
+      z-index:0;
+    }
+
+    .card {
+      position: absolute;
+      left: 1rem;
+      bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap:8px;
+      padding:16px 22px;
+      background: linear-gradient(145deg, rgba(20,22,35,0.55), rgba(10,12,25,0.55));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px;
+      max-width: 70%;
+      color: #f5f5f5;
+      box-shadow: 0 28px 60px -12px rgba(0,0,0,0.4);
+      z-index:4;
+      font-size: 1rem;
+      line-height:1.2;
+      overflow:hidden;
+    }
+
+    .date {
+      font-family: Georgia, "Times New Roman", serif;
+      font-variant: small-caps;
+      font-weight: 600;
+      font-size: clamp(1.4rem, 2.8vw, 3.2rem);
+      letter-spacing: 1px;
+      margin:0;
+      white-space: nowrap;
+    }
+
+    .weather {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-size: clamp(0.85rem, 1vw, 1.1rem);
+    }
+    .weather .icon {
+      width: 1.2em;
+      height: 1.2em;
+      flex-shrink:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .weather .desc {
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: capitalize;
+    }
+    .temps {
+      display: flex;
+      gap: 6px;
+      align-items: baseline;
+      font-weight: 400;
+    }
+    .current {
+      font-weight: 600;
+    }
+    .hi-lo {
+      font-size: 0.85em;
+      opacity: 0.85;
+      display: flex;
+      gap: 4px;
+    }
+
+    .message {
+      margin-top:4px;
+      font-size: clamp(0.75rem, 1vw, 1rem);
+      font-weight: 400;
+      opacity:0.95;
+    }
+
+    .error {
+      position:absolute;
+      left:1rem;
+      bottom:5.5rem;
+      background: rgba(0,0,0,0.6);
+      padding:6px 10px;
+      border-radius:6px;
+      color:#f88;
+      font-size:0.75rem;
+      cursor:pointer;
+      user-select:none;
+      z-index:5;
+      display:flex;
+      gap:6px;
+      align-items:center;
+      max-width:80%;
+      line-height:1.1;
+    }
+    .error small {
+      margin-left:4px;
+      color:#fff;
+      font-size:0.6rem;
+      opacity:0.8;
+    }
+
+    svg.weather-icon {
+      width: 1.2em;
+      height: 1.2em;
+      display:block;
+      fill: none;
+      stroke: white;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .card { transition: all .3s ease; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <img id="bg-img" alt="背景图" draggable="false" />
+    <div class="color-gradient" aria-hidden="true"></div>
+    <div class="card" id="infoCard">
+      <div class="date" id="date">AUG 1</div>
+      <div class="weather" id="weatherLine" aria-label="">
+        <div class="icon" id="weatherIcon"></div>
+        <div class="desc" id="weatherDesc">Cloud</div>
+        <div class="temps">
+          <div class="current" id="tempMain">32°C</div>
+          <div class="hi-lo" id="tempHiLo">↑34° ↓28°</div>
+        </div>
+      </div>
+      <div class="message" id="message">
+        在这样的天气里，保持清爽，感受日光与微风交织出的静谧，让每一刻都像被精心雕琢的画面。
+      </div>
+    </div>
+    <div class="error" id="error" style="display:none;">
+      <div id="err-msg">图片加载失败，点击重试</div>
+      <small>(确认链接可访问且已正确编码)</small>
+    </div>
+  </div>
+
+  <script>
+    // 工具
+    function toBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
+    function getQueryParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
+    
+
+    // DOM
+    const bgImg = document.getElementById('bg-img');
+    const dateEl = document.getElementById('date');
+    const messageEl = document.getElementById('message');
+    const errorDiv = document.getElementById('error');
+    const errMsg = document.getElementById('err-msg');
+    const weatherLine = document.getElementById('weatherLine');
+    const weatherDescEl = document.getElementById('weatherDesc');
+    const tempMainEl = document.getElementById('tempMain');
+    const tempHiLoEl = document.getElementById('tempHiLo');
+    const weatherIconContainer = document.getElementById('weatherIcon');
+
+    // 默认与参数
+    const defaultMsgText = '在这样的天气里，保持清爽，感受日光与微风交织出的静谧，让每一刻都像被精心雕琢的画面。';
+    const rawMsg = getQueryParam('text');
+    messageEl.textContent = rawMsg ? decodeURIComponent(rawMsg) : defaultMsgText;
+
+    // 日期：英文大写月日
+    function updateDate() {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        timeZone: 'Asia/Shanghai'
+      });
+      let formatted = formatter.format(now).toUpperCase().replace(' ', '\u202F');
+      dateEl.textContent = formatted;
+    }
+    updateDate();
+    setInterval(updateDate, 1000 * 60 * 60);
+
+    // SVG 小图标（白色 stroke）
+    const icons = {
+      'clear': `
+        <svg class="weather-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <g>
+            <line x1="12" y1="1" x2="12" y2="4"/>
+            <line x1="12" y1="20" x2="12" y2="23"/>
+            <line x1="1" y1="12" x2="4" y2="12"/>
+            <line x1="20" y1="12" x2="23" y2="12"/>
+            <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/>
+            <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/>
+            <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/>
+            <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/>
+          </g>
+        </svg>`,
+      'sunny': `
+        <svg class="weather-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <g>
+            <line x1="12" y1="2" x2="12" y2="5"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="5" y2="12"/>
+            <line x1="19" y1="12" x2="22" y2="12"/>
+          </g>
+        </svg>`,
+      'cloud': `
+        <svg class="weather-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 16a4 4 0 0 1 0-8 5 5 0 0 1 9.9 1.1A3.5 3.5 0 0 1 19 14h.5a2.5 2.5 0 0 1 0 5H6z"/>
+        </svg>`,
+      'rain': `
+        <svg class="weather-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 14a4 4 0 0 1 0-8 5 5 0 0 1 9.9 1.1A3.5 3.5 0 0 1 19 12h.5a2.5 2.5 0 0 1 0 5H6z"/>
+          <line x1="8" y1="20" x2="8" y2="17"/>
+          <line x1="12" y1="20" x2="12" y2="17"/>
+          <line x1="16" y1="20" x2="16" y2="17"/>
+        </svg>`,
+      'snow': `
+        <svg class="weather-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <g>
+            <line x1="12" y1="4" x2="12" y2="20"/>
+            <line x1="4" y1="12" x2="20" y2="12"/>
+            <line x1="5.6" y1="5.6" x2="18.4" y2="18.4"/>
+            <line x1="5.6" y1="18.4" x2="18.4" y2="5.6"/>
+          </g>
+        </svg>`
+    };
+
+    // 读取天气参数
+    const defaultWeather = {
+      desc: 'snow',
+      temp: '32°C',
+      high: '34°C',
+      low: '28°C'
+    };
+    const rawDescInput = (getQueryParam('condition') || defaultWeather.desc).toLowerCase().trim();
+    const wDesc = rawDescInput;
+    const wTemp = getQueryParam('temp') || defaultWeather.temp;
+    const wHigh = getQueryParam('max_temp') || defaultWeather.high;
+    const wLow = getQueryParam('min_temp') || defaultWeather.low;
+
+    // 选 icon：支持宽松匹配
+    function iconFor(desc) {
+      let key = desc.toLowerCase().replace(/\s+/g, ' ').trim();
+      if (key === 'clearsky') key = 'clear sky';
+      if (icons[key]) return icons[key];
+      for (const k of Object.keys(icons)) {
+        if (key.includes(k.replace(/\s+/g, ''))) return icons[k];
+      }
+      return icons['cloud'];
+    }
+
+    // 填 UI
+    weatherIconContainer.innerHTML = iconFor(wDesc);
+    weatherDescEl.textContent = wDesc.replace(/\b\w/g, c => c.toUpperCase());
+    tempMainEl.textContent = wTemp;
+    const highNum = wHigh.replace(/°C?/, '');
+    const lowNum = wLow.replace(/°C?/, '');
+    tempHiLoEl.textContent = `↑${highNum}° ↓${lowNum}°`;
+    weatherLine.setAttribute(
+      'aria-label',
+      `${weatherDescEl.textContent}，当前 ${wTemp}，高温 ${wHigh}，低温 ${wLow}`
+    );
+
+    // 背景图加载（支持 ?img=...）
+    const rawImgParam = getQueryParam('img_path');
+    const defaultExternal = 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?auto=format&fit=crop&w=1920&q=80';
+    const currentSrc = rawImgParam ? decodeURIComponent(rawImgParam) : defaultExternal;
+
+    function setBackground(src){
+      const tester = new Image();
+      tester.crossOrigin = 'anonymous';
+      tester.onload = ()=> {
+        bgImg.src = src;
+        errorDiv.style.display='none';
+      };
+      tester.onerror = ()=> {
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080">
+  <rect width="100%" height="100%" fill="#1f1f1f"/>
+  <text x="50%" y="45%" dominant-baseline="middle" text-anchor="middle" font-size="60" fill="#ddd" font-family="Georgia,serif">IMAGE FAILED</text>
+  <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="30" fill="#aaa" font-family="Georgia,serif">Fallback applied</text>
+</svg>`;
+        const dataUri='data:image/svg+xml;base64,'+toBase64(svg);
+        bgImg.src=dataUri;
+        errMsg.textContent='原始图片加载失败，已回退。点击重试。';
+        errorDiv.style.display='flex';
+      };
+      tester.src=src;
+    }
+
+    setBackground(currentSrc);
+
+    // 重试逻辑
+    errorDiv.addEventListener('click', ()=>{
+      if (rawImgParam) {
+        errMsg.textContent='重试中...';
+        setBackground(decodeURIComponent(rawImgParam));
+      } else {
+        errMsg.textContent='重试默认图片...';
+        setBackground(defaultExternal);
+      }
+    });
+  </script>
+</body>
+</html>

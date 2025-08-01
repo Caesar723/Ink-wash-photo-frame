@@ -126,6 +126,14 @@ def get_router(appServer:"AppServer") -> APIRouter:
             raise HTTPException(status_code=404, detail="图片不存在")
        
 
+    @router.post("/get_place_mode")
+    async def get_place_mode(request: Request):
+        mode=appServer.config["target_img_size"]
+        if mode[0]>mode[1]:
+            return {"mode":"horizontal"}
+        else:
+            return {"mode":"vertical"}
+
     @router.post("/change_place_mode")
     async def change_place_mode(request: Request):
         data=await request.json()
@@ -144,10 +152,12 @@ def get_router(appServer:"AppServer") -> APIRouter:
     @router.post("/setTime")
     async def setTime(request: Request):
         data=await request.json()
-        print(data)
         days=data["days"]
         hours=data["hours"]
         minutes=data["minutes"]
+        if days==0 and hours==0 and minutes==0:
+            return {"status":"failed"}
+        
         appServer.config["image_selector_interval"]={"days":days,"hours":hours,"minutes":minutes}
 
         appServer.baseImageSelector.scheduler.reschedule_job(

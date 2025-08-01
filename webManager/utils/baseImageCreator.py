@@ -25,14 +25,14 @@ class BaseImageCreator(BaseHookManager):
     async def get_chat_response(self,extra=None):
         
         message=self.get_chat_prompt(extra)
-        print(message)
+        
         response = await self.client.chat.completions.create(
             model=self.config["chat_model"],
             messages=message,
             temperature=1.0,
         )
         content=response.choices[0].message.content
-        print(content)
+        
         
         return content
 
@@ -48,9 +48,34 @@ class BaseImageCreator(BaseHookManager):
     async def create_image(self):
         pass
 
+            
+
+
     def get_image_path(self,base_path):
         image_paths=os.listdir(base_path)
-        path=random.choice(image_paths)
+        
+        max_attempts=3
+        tolerance=0.5
+        expected_ratio=self.config["target_img_size"][0]/self.config["target_img_size"][1]
+        print(expected_ratio)
+        
+        for _ in range(max_attempts):
+            path = random.choice(image_paths)
+            full_path = os.path.join(base_path, path)
+
+            try:
+                with Image.open(full_path) as img:
+                    img=ImageOps.exif_transpose(img)
+                    width, height = img.size
+                    
+                    ratio = width / height
+                    print(ratio)
+                    
+                    if abs(ratio - expected_ratio) <= tolerance:
+                        return path
+            except Exception as e:
+                print(f"跳过无效图片: {full_path}，错误: {e}")
+                continue
         return path
 
     def image_preprocess(self,image):
@@ -76,6 +101,7 @@ class BaseImageCreator(BaseHookManager):
 
 
     def _read_pil(self,image_path):
+        
         if not os.path.exists(image_path):
             return Image.new("RGB", self.config["target_img_size"], (255, 255, 255))
         img = Image.open(image_path)

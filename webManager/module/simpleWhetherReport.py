@@ -198,7 +198,7 @@ class SimpleWhetherReport(BaseImageCreator):
                 "precipitation_chance_pct": round(pop * 100),  # 百分比
             })
 
-        print(data)
+        
 
         summary = {
             "city": data["city"],

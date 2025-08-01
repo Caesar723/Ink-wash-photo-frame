@@ -73,6 +73,20 @@ const configs = [
   }
 
   // 方向切换
+
+  async function get_place_mode(){
+    const response=await requestSender.get_place_mode();
+    console.log(response);
+    if(response.mode=="horizontal"){
+      document.getElementById('hor').checked=true;
+      document.getElementById('ver').checked=false;
+    }else{
+      document.getElementById('ver').checked=true;
+      document.getElementById('hor').checked=false;
+    }
+  }
+  get_place_mode();
+  
   document.querySelectorAll('input[name="orientation"]').forEach(inp => {
     inp.addEventListener('change', async (e) => {
         const status=await requestSender.change_place_mode(e.target.value);

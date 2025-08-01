@@ -81,6 +81,11 @@ class RequestSender{
         const response = await this.send_request("change_image");
         return response.status;
     }
+
+    async get_place_mode(){
+        const response = await this.send_request("get_place_mode");
+        return response.mode;
+    }
 }
 
 const requestSender = new RequestSender();

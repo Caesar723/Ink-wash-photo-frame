@@ -58,6 +58,15 @@ def get_router(appServer:"AppServer") -> APIRouter:
             }
         )
 
+    @router.get("/threeCombineOne")
+    async def threeCombineOne(request: Request):
+        return appServer.templates.TemplateResponse(
+            "threeCombineOne.html", 
+            {
+            "request": request,
+            }
+        )
+
 
     @router.get("/")
     async def index(request: Request):
