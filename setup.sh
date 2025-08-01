@@ -38,6 +38,12 @@ pip3 install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 pip3 install playwright -i https://pypi.tuna.tsinghua.edu.cn/simple
 playwright install
 
+
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable startscript.service
+sudo systemctl start startscript.service
 # pip3 install RPi.GPIO -i https://pypi.tuna.tsinghua.edu.cn/simple
 # pip3 install pillow numpy -i https://pypi.tuna.tsinghua.edu.cn/simple
 # pip3 install spidev -i https://pypi.tuna.tsinghua.edu.cn/simple
