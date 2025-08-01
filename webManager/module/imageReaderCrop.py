@@ -43,7 +43,8 @@ class ImageReaderCrop(BaseImageCreator):
         :param upscale: 是否允许放大（原图比目标小的时候）。不允许则可能无法覆盖目标尺寸。
         :return: PIL.Image（大小为 config['target_img_size']）
         """
-        target_width, target_height = self.config["target_img_size"]
+        print(image.size)
+        target_height, target_width = self.config["target_img_size"]
         original_width, original_height = image.size
 
         # 为兼容 Pillow 新旧版本的 LANCZOS
@@ -92,6 +93,8 @@ class ImageReaderCrop(BaseImageCreator):
         left, top = get_offsets(mode.lower())
         box = (left, top, left + target_width, top + target_height)
         out = resized.crop(box)
+        print(out.size)
+        
         return out
 
 
