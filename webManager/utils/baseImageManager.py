@@ -4,7 +4,7 @@ import os
 import cv2
 from PIL import Image
 
-test=0
+test=1
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -64,6 +64,8 @@ class BaseImageManager(BaseHookManager):
         print(image)
         if test==0:
             self.epd.display(self.epd.getbuffer(image))
+        else:
+            image.show()
 
     def clear_image(self):
         print("clear image")

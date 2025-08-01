@@ -24,55 +24,70 @@ class SimpleWhetherReport(BaseImageCreator):
         pass
 
     def get_chat_prompt(self,summary_whether=None):
-        prompt='''
+        weather_joke_variants = [
+            "押韵", "人设化", "一问一答", "比喻风格", "对话体", "冷知识风格", "反转幽默", "自嘲式幽默", "励志式冷笑话", "谐音梗（pun）",
+            "童话风格", "科技风", "脱口秀风格", "网络梗混搭", "哲学式吐槽", "假设式问题", "荒诞派风格", "内心独白", "拟物风格", "古风改编",
+            "天气播报体", "客服对话体", "朋友圈文案", "小红书体", "知乎体", "微博热搜语气", "程序员吐槽", "小学生作文", "自由诗", "广告词模仿",
+            "情书风格", "恐怖故事", "地摊文学", "玄幻小说", "影评人语气", "电台 DJ", "玄学预言", "日记体", "导航语音", "语文阅读理解",
+            "客服机器人", "表白失败", "相声风格", "段子手语气", "AI 自嘲", "新闻联播", "歌词改编", "电影台词", "小说旁白", "失败的鼓励师"
+        ]
+        prompt=rf'''
 你是一个天气摘要助手。输入是一个包含当前天气和未来若干时段预报的 JSON 结构，格式如下：
-{
+{{
   "current_temp": 浮点,             
   "feels_like": 浮点,              # 体感温度
   "description": 字符串,           # 详细描述，如 "broken clouds"
   "upcoming": [                   # 当前时间之后的多个 3 小时预报
-    {
+    {{
       "time": "YYYY-MM-DD HH:MM:SS",# 时间，注意有一些时间早于当前时间，所以最好可以忽略掉
       "temp": 浮点,
       "condition": 同上四种之一,
       "description": 字符串,
       "precipitation_mm": 浮点,            # 降水量（mm）
       "precipitation_chance_pct": 整数     # 降水概率百分比
-    },
+    }},
     ...
   ]
-}
+}}
 
 请根据这个数据生成一个**一句话的中文天气提醒/总结**，控制在大约 50 个中文字符以内（不需要写字段名），要涵盖下面要点：
 1. 当前温度与体感（若体感比实际高 3℃ 以上，提示“闷热”或“注意补水”）。
 2. 当前主要天气（如多云、下雨等）。
 3. 接下来的关键变化：如果未来有一次或多次降雨（降水概率 ≥50% 或降水量 ≥0.2mm），明确指出大致开始时间并提醒带伞；如果气温在接下来几个时段变化明显（升高/降低 ≥2℃），提示温差。
 4. 语气友好、实用，不要列出原始数值过多，尽量浓缩成自然流畅的一句话。
-5. 最后再看一个小玩笑
+5. 最后加一句轻松幽默的小玩笑或冷笑话主题是{random.choice(weather_joke_variants)}，主题跟天气相关，避免重复说法。
 示例输出（基于样例数据）：
 “目前多云，27℃体感32℃闷热，18点起有小雨，出门记得带伞。” 
         '''
         summary_whether=dict(summary_whether)
-        current_time = datetime.now().strftime("%H:%M")
+
+        now = datetime.now()
+        filtered_upcoming = []
+        for entry in summary_whether.get("upcoming", []):
+            try:
+                t = datetime.strptime(entry["time"], "%Y-%m-%d %H:%M:%S")
+                if t > now:
+                    filtered_upcoming.append(entry)
+            except:
+                continue
+        summary_whether["upcoming"] = filtered_upcoming
+        
         del summary_whether["condition"]
         messages=[
             {"role": "system",  "content": prompt},
-            {"role": "user",  "content": f"当前时间：{current_time}\n{str(summary_whether)}"},
+            {"role": "user",  "content": f"{str(summary_whether)}"},
         ]
 
         return messages
 
     async def get_chat_response(self):
-        try:
-            data=await self.fetch_weather_and_forecast_async()
-            summary=self.summarize_weather(data,12)
-            
-            content=await super().get_chat_response(summary)
-            
-        except Exception as e:
-            print(e)
-            content="天气预报失败"
-            summary=None
+        
+        data=await self.fetch_weather_and_forecast_async()
+        summary=self.summarize_weather(data,12)
+        
+        content=await super().get_chat_response(summary)
+        
+        
             
         return content,summary
 

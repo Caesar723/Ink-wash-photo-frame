@@ -9,7 +9,7 @@ chat_model: Doubao-1.5-lite-32k
 image_selector_interval:
   days: 0
   hours: 0
-  minutes: 5
+  minutes: 3
 module_dict:
   "AI\u4F5C\u8BCD": webManager.module.chatApi.ChatApi
   "\u5929\u6C14\u9884\u62A5": webManager.module.whetherReport.BaseWhetherReport
@@ -25,7 +25,7 @@ pre_content: "\u751F\u6D3B\u5982\u8346\u68D8\u4E1B\uFF0C\u523A\u75DB\u4E0D\u65AD
   \u96BE\uFF0C\u8FCE\u6765\u67F3\u6697\u82B1\u660E\uFF0C\u8BA9\u751F\u547D\u7EFD\u653E\
   \u51FA\u522B\u6837\u7684\u7EDA\u70C2\u5149\u5F69\u3002 "
 target_img_size:
-- 800
 - 480
+- 800
 whether_api_token: f077afc158a17acaef193a6f67b0f5d3
 whether_city: Shanghai,cn

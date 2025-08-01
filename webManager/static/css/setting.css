@@ -94,7 +94,13 @@
     transition: background 0.2s;
     margin-top: 20px;
   }
-  .btn-submit:hover {
+  
+  @media (hover: hover) and (pointer: fine) {
+    .btn-submit:hover {
+      background: #0056b3;
+    }
+  }
+  .btn-submit:active {
     background: #0056b3;
   }
   .components-container{

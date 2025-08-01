@@ -179,10 +179,19 @@ const configs = [
   });
 
   document.getElementById('change-image').addEventListener('click', async () => {
+    const button = document.getElementById('change-image');
+    const btnText = button.querySelector('.btn-text');
+    const spinner = button.querySelector('.spinner_change_image');
+    button.disabled = true;
+    btnText.textContent = "加载中";
+    spinner.style.display = "inline-block";
     const status=await requestSender.change_image();
     if(status=="success"){
         console.log("更换图片成功");
     }else{
         console.log("更换图片失败");
     }
+    button.disabled = false;
+    btnText.textContent = "换一张图片";
+    spinner.style.display = "none";
   });

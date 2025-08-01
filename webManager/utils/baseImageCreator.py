@@ -107,9 +107,9 @@ class BaseImageCreator(BaseHookManager):
 
     def image_final_process(self,image):
         if self.config["target_img_size"][0]==800:
-            image= image.rotate(180)
+            image= image.rotate(180, expand=True)
         else:
-            image= image.rotate(90)
+            image= image.rotate(90, expand=True)
         return image
 
 
