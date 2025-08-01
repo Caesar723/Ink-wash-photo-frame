@@ -115,7 +115,7 @@ class BaseImageCreator(BaseHookManager):
         async with async_playwright() as p:
             browser = await p.chromium.launch()
             context = await browser.new_context(
-                viewport={"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]},
+                viewport={"width": self.config["target_img_size"][1], "height": self.config["target_img_size"][0]},
                 device_scale_factor=1,
             )
             #print({"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]})
@@ -135,7 +135,7 @@ class BaseImageCreator(BaseHookManager):
         if self.config["target_img_size"][0]==800:
             image= image.rotate(180, expand=True)
         else:
-            image= image.rotate(90, expand=True)
+            image= image.rotate(-90, expand=True)
         return image
 
 

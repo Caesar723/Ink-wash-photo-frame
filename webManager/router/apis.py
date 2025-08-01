@@ -129,7 +129,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
     @router.post("/get_place_mode")
     async def get_place_mode(request: Request):
         mode=appServer.config["target_img_size"]
-        if mode[0]>mode[1]:
+        if mode[0]<mode[1]:
             return {"mode":"horizontal"}
         else:
             return {"mode":"vertical"}
@@ -141,9 +141,9 @@ def get_router(appServer:"AppServer") -> APIRouter:
         print(mode)
 
         if mode=="horizontal":
-            appServer.config["target_img_size"]= [800, 480]
+            appServer.config["target_img_size"]= [480, 800]
         elif mode=="vertical":
-            appServer.config["target_img_size"]=[480,800]
+            appServer.config["target_img_size"]=[800,480]
         
         
         return {"status":"success"}
