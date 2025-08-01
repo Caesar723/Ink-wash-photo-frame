@@ -33,6 +33,7 @@ module_dict:
   普通展示_填充: "webManager.module.imageReader.ImageReader"
   普通展示_裁剪: "webManager.module.imageReaderCrop.ImageReaderCrop"
   AI作词: "webManager.module.chatApi.ChatApi"
+  三合一: "webManager.module.threeCombineOne.ThreeCombineOne"
 
 
 module_used:
@@ -41,6 +42,7 @@ module_used:
   - "普通展示_裁剪"
   - "天气预报"
   - "简单天气"
+  - "三合一"
 
 
 image_selector_interval:

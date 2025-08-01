@@ -146,9 +146,20 @@ class ThreeCombineOne(BaseImageCreator):
         forecast_list = data["forecast"]["list"]  # 3h 间隔
 
         # 当前温度 / 体感 / weather info
+
+        today=datetime.now().strftime("%Y-%m-%d")
+
+        forecast_list=[forecast for forecast in forecast_list if forecast["dt_txt"].startswith(today)]
+
+        min_temps=[forecast["main"]["temp_min"] for forecast in forecast_list]
+        max_temps=[forecast["main"]["temp_max"] for forecast in forecast_list]
+        
         current_temp = current.get("main", {}).get("temp")
-        max_temp = current.get("main", {}).get("temp_max")
-        min_temp = current.get("main", {}).get("temp_min")
+
+        min_temps.append(current_temp)
+        max_temps.append(current_temp)
+        max_temp = max(max_temps)
+        min_temp = min(min_temps)
         feels_like = current.get("main", {}).get("feels_like")
         weather_info = current.get("weather", [{}])[0]
         main_desc = weather_info.get("main", "")
