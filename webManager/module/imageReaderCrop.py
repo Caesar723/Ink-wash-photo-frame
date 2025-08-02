@@ -1,5 +1,5 @@
 import os
-from PIL import Image,ImageOps
+from PIL import Image,ImageOps,ImageEnhance
 import asyncio
 import math
 if __name__ == "__main__":
@@ -27,6 +27,10 @@ class ImageReaderCrop(BaseImageCreator):
         
         return image
     def image_final_process(self,image):
+        saturation_factor = 3  # 提高饱和度 50%
+        enhancer = ImageEnhance.Color(image)
+        image = enhancer.enhance(saturation_factor)
+        print("enhance",image.size)
         if self.config["target_img_size"][0]==800:
             image= image.rotate(-90, expand=True)
         else:
@@ -106,6 +110,7 @@ if __name__ == "__main__":
         config=read_yaml("webManager/config/basic.yaml")
         image_reader=ImageReaderCrop(config)
         image=await image_reader.create_image()
+        image=image_reader.image_final_process(image)
 
         image.show()
 

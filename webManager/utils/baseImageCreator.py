@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont, ImageOps, ImageEnhance
 import os
 from openai import AsyncOpenAI
 import random
@@ -135,6 +135,10 @@ class BaseImageCreator(BaseHookManager):
         return image
 
     def image_final_process(self,image):
+        saturation_factor = 1.5  # 提高饱和度 50%
+        enhancer = ImageEnhance.Color(image)
+        image = enhancer.enhance(saturation_factor)
+        
         if self.config["target_img_size"][0]==800:
             image= image.rotate(-90, expand=True)
         else:
