@@ -76,8 +76,9 @@ const configs = [
 
   async function get_place_mode(){
     const response=await requestSender.get_place_mode();
-    console.log(response);
-    if(response.mode=="horizontal"){
+    
+    if(response==="horizontal"){
+      
       document.getElementById('hor').checked=true;
       document.getElementById('ver').checked=false;
     }else{

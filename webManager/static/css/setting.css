@@ -36,8 +36,8 @@
     font-weight: 500;
     transition: background 0.3s, color 0.3s;
   }
-  #hor:checked + label[for="hor"],
-  #ver:checked + label[for="ver"] {
+  #hor:checked ~ label[for="hor"],
+  #ver:checked ~ label[for="ver"] {
     background: var(--accent);
     color: #fff;
   }
