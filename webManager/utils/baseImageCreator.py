@@ -135,7 +135,7 @@ class BaseImageCreator(BaseHookManager):
         return image
 
     def image_final_process(self,image):
-        saturation_factor = 1.5  # 提高饱和度 50%
+        saturation_factor = 3  # 提高饱和度 50%
         enhancer = ImageEnhance.Color(image)
         image = enhancer.enhance(saturation_factor)
         

@@ -28,7 +28,7 @@ class ImageReader(BaseImageCreator):
         return image
 
     def image_final_process(self,image):
-        saturation_factor = 1.5  # 提高饱和度 50%
+        saturation_factor = 3  # 提高饱和度 50%
         enhancer = ImageEnhance.Color(image)
         image = enhancer.enhance(saturation_factor)
         if self.config["target_img_size"][0]==800:
@@ -45,8 +45,8 @@ if __name__ == "__main__":
         print(sys.path)
         config=read_yaml("webManager/config/basic.yaml")
         image_reader=ImageReader(config)
-        data=await image_reader.fetch_weather_and_forecast_async()
-        print(data)
+        image=await image_reader.create_image_whole_process()
+        image.show()
 
         
 
