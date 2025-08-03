@@ -20,7 +20,7 @@ git config --global user.email "13122531903@163.com"
 
 cd /home/xuanpeichen
 
-wget https://github.com/WiringPi/WiringPi/releases/download/2.61-1/wiringpi-2.61-1-arm64.deb
+wget https://ghfast.top/https://github.com/WiringPi/WiringPi/releases/download/2.61-1/wiringpi-2.61-1-arm64.deb
 sudo dpkg -i wiringpi-2.61-1-arm64.deb
 gpio -v
 rm -rf wiringpi-2.61-1-arm64.deb

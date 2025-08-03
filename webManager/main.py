@@ -76,7 +76,11 @@ class AppServer:
 
 
     def run(self, host: str = "0.0.0.0", port: int = 8000):
-        uvicorn.run(self.app, host=host, port=port)  # reload 方便开发
+        uvicorn.run(self.app, 
+        host=host, 
+        port=port,
+        ssl_keyfile="ssl/key.pem",
+        ssl_certfile="ssl/cert.pem")  # reload 方便开发
 
 # ▶ 运行：
 if __name__ == "__main__":
