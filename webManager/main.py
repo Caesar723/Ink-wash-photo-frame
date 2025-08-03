@@ -79,8 +79,7 @@ class AppServer:
         uvicorn.run(self.app, 
         host=host, 
         port=port,
-        ssl_keyfile="ssl/key.pem",
-        ssl_certfile="ssl/cert.pem")  # reload 方便开发
+        )  # reload 方便开发
 
 # ▶ 运行：
 if __name__ == "__main__":
