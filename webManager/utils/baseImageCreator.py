@@ -30,6 +30,7 @@ class BaseImageCreator(BaseHookManager):
             model=self.config["chat_model"],
             messages=message,
             temperature=1.0,
+            timeout=90.0,
         )
         content=response.choices[0].message.content
         
@@ -151,6 +152,8 @@ class BaseImageCreator(BaseHookManager):
 
         api_key=self.config["whether_api_token"]
         city_name=self.config["whether_city"]
+
+        timeout = httpx.Timeout(connect=90.0, read=90.0) 
         async with httpx.AsyncClient(timeout=timeout) as client:
             # 1. 地理编码
             geo_resp = await client.get(
