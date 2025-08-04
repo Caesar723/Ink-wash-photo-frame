@@ -153,7 +153,7 @@ class BaseImageCreator(BaseHookManager):
         api_key=self.config["whether_api_token"]
         city_name=self.config["whether_city"]
 
-        timeout = httpx.Timeout(connect=90.0, read=90.0) 
+        timeout = httpx.Timeout(90.0) 
         async with httpx.AsyncClient(timeout=timeout) as client:
             # 1. 地理编码
             geo_resp = await client.get(
