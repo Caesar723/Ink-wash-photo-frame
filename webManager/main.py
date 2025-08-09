@@ -79,6 +79,8 @@ class AppServer:
         uvicorn.run(self.app, 
         host=host, 
         port=port,
+        # ssl_certfile="ssl/cert.pem",
+        # ssl_keyfile="ssl/key.pem"
         )  # reload 方便开发
 
 # ▶ 运行：
