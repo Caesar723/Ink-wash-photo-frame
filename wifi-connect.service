@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c '/usr/local/sbin/wifi-connect --ssid "$(hostname)_wifi connect"'
+ExecStart=/home/xuanpeichen/Desktop/Ink-wash-photo-frame/wifi-connect-static-ip.sh
 Restart=always
 RestartSec=10
 
