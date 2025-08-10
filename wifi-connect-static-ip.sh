@@ -21,6 +21,6 @@ done
 # 如果连续 FAIL_COUNT 次失败，启动 WiFi Connect
 if [ "$FAIL_COUNT" -ge "$MAX_RETRY" ]; then
     echo "连续 $FAIL_COUNT 次无网络，启动 WiFi Connect"
-    /usr/local/sbin/wifi-connect --portal-ssid "$(hostname)_wifi connect"
+    sudo /usr/local/sbin/wifi-connect --portal-ssid "$(hostname)_wifi connect"
 fi
 
