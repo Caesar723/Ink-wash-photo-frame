@@ -1,0 +1,12 @@
+[Unit]
+Description=WiFi Connect
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c '/usr/local/sbin/wifi-connect --ssid "$(hostname)_wifi connect"'
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

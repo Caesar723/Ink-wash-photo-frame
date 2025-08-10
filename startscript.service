@@ -1,0 +1,11 @@
+[Unit]
+Description=Start My Script at Boot
+After=network.target
+
+[Service]
+ExecStart=/home/xuanpeichen/Desktop/Ink-wash-photo-frame/start.sh
+Restart=on-failure
+User=xuanpeichen
+
+[Install]
+WantedBy=multi-user.target
