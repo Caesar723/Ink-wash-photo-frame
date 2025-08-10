@@ -39,7 +39,7 @@ sudo apt-get update
 sudo apt-get install -y libgtk-4-1 libgraphene-1.0-0
 
 
-wget https://github.com/balena-os/wifi-connect/releases/download/v4.4.6/wifi-connect-v4.4.6-linux-aarch64.tar.gz
+wget https://ghfast.top/https://github.com/balena-os/wifi-connect/releases/download/v4.4.6/wifi-connect-v4.4.6-linux-aarch64.tar.gz
 tar -zxvf wifi-connect-v4.4.6-linux-aarch64.tar.gz
 sudo install -m 0755 wifi-connect /usr/local/sbin/wifi-connect
 /usr/local/sbin/wifi-connect --version
@@ -61,7 +61,9 @@ sudo raspi-config nonint do_spi 0
 
 sudo cp startscript.service /etc/systemd/system/
 
+
 sudo cp wifi-connect.service /etc/systemd/system/
+
 sudo systemctl daemon-reload
 
 
@@ -73,6 +75,8 @@ sudo systemctl enable wifi-connect.service
 sudo systemctl start wifi-connect.service
 
 chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/start.sh
+chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/wifi-connect-static-ip.sh
+chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/startscript.sh
 
 # pip3 install RPi.GPIO -i https://pypi.tuna.tsinghua.edu.cn/simple
 # pip3 install pillow numpy -i https://pypi.tuna.tsinghua.edu.cn/simple
