@@ -1,0 +1,70 @@
+:root { color-scheme: light dark; }
+.glass {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+}
+.spinner {
+  width: 18px; height: 18px; border: 2px solid transparent;
+  border-top-color: currentColor; border-right-color: currentColor;
+  border-radius: 50%; animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.nice-select {
+    -webkit-appearance: none; appearance: none;
+    background-color: #fff; color: #111827;
+    border: 1px solid #d1d5db; border-radius: 12px;
+    padding: 10px 36px 10px 40px; /* 右边给箭头，左边给Wi-Fi图标 */
+    width: 100%; line-height: 1.2;
+    box-shadow: 0 1px 2px rgba(0,0,0,.06);
+    /* 左：Wi-Fi 图标；右：下拉箭头（注意 %23 是 # 的转义） */
+    background-repeat: no-repeat, no-repeat;
+    background-position: 12px 50%, calc(100% - 12px) 50%;
+    background-size: 22px 22px, 14px 14px;
+    background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke="%23999" stroke-width="2" fill="none" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5 12a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/></g><circle cx="12" cy="19" r="1.5" fill="%23999"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+    }
+    .nice-select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+    }
+
+
+
+.nice-input { position: relative; }
+.nice-input input{
+-webkit-appearance:none; appearance:none;
+width:100%;
+background:#fff; color:#111827;
+border:1px solid #d1d5db; border-radius:12px;
+padding:10px 48px 10px 44px; /* 左锁右眼睛 */
+line-height:1.2; box-shadow:0 1px 2px rgba(0,0,0,.06);
+background-repeat:no-repeat;
+background-position:12px 50%;
+background-size:20px 20px;
+/* 左侧锁图标（# 需转义为 %23） */
+background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2" ry="2" fill="none" stroke="%23999" stroke-width="2"/><path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round"/></svg>');
+}
+.nice-input input:focus{
+outline:none; border-color:#6366f1;
+box-shadow:0 0 0 3px rgba(99,102,241,.2);
+}
+
+.nice-input .toggle{
+position:absolute; right:6px; top:50%; transform:translateY(-50%);
+width:36px; height:36px; border:none; background:transparent;
+border-radius:8px; cursor:pointer; opacity:.85;
+background-repeat:no-repeat; background-position:center; background-size:22px 22px;
+}
+/* 眼睛（显示密码） */
+.nice-input .toggle[data-state="hidden"]{
+background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="%23555" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="%23555" stroke-width="2"/></svg>');
+}
+/* 眼睛 + 斜杠（隐藏密码） */
+.nice-input .toggle[data-state="shown"]{
+background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="%23555" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="%23555" stroke-width="2"/><line x1="3" y1="3" x2="21" y2="21" stroke="%23b91c1c" stroke-width="2" stroke-linecap="round"/></svg>');
+}
+.nice-input .toggle:hover{ opacity:1; }

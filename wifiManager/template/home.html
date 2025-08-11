@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover"
+  />
+  <title>Wi-Fi 配置</title>
+  <!-- Tailwind（CDN） -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/css/home.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-indigo-500 via-sky-500 to-emerald-400 text-white">
+    <!-- SVG 图标库 -->
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:none">
+        <symbol id="ico-wifi" viewBox="0 0 24 24">
+          <path d="M12 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" fill="currentColor"/>
+          <path d="M4.93 12.93a10 10 0 0 1 14.14 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7.76 15.76a6 6 0 0 1 8.49 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M1.71 9.17a14 14 0 0 1 20.58 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="ico-chevron" viewBox="0 0 24 24">
+          <polyline points="6 9 12 15 18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+      </svg>
+  </svg>
+  <div class="max-w-xl mx-auto px-5 py-10 sm:py-16">
+    <header class="mb-8">
+      <h1 class="text-3xl sm:text-4xl font-bold drop-shadow">连接到 Wi-Fi</h1>
+      <p class="opacity-90 mt-2">请选择网络并输入密码，设备将自动连接并显示 IP 地址。</p>
+    </header>
+
+    <main class="glass rounded-2xl p-6 sm:p-8 shadow-xl">
+      <!-- SSID + 刷新 -->
+      <div class="mb-5">
+        <label class="block mb-2 font-medium">可用网络（仅 2.4G）</label>
+        <div class="flex gap-3">
+          <select id="ssid" class="nice-select" title="选择要连接的 Wi-Fi"></select>
+          <button id="refresh" class="rounded-xl px-4 py-3 bg-white/10 hover:bg-white/20 transition-colors">
+            刷新
+          </button>
+        </div>
+        <p id="ssidHint" class="text-sm mt-2 opacity-90"></p>
+      </div>
+
+      <!-- 密码 -->
+      
+      <div class="mb-6">
+        <label class="block mb-2 font-medium">密码</label>
+        <div class="nice-input" id="pwdBox">
+          <input id="psk" type="password" placeholder="输入 Wi-Fi 密码（开放网络可留空）" />
+          <button id="togglePwd" type="button" class="toggle" aria-label="显示/隐藏密码" data-state="hidden"></button>
+        </div>
+        <p class="mt-2 text-xs text-white/70">支持中文/英文密码，区分大小写</p>
+      </div>
+
+      <!-- 连接按钮 -->
+      <div class="flex items-center gap-3">
+        <button id="connectBtn"
+                class="rounded-xl px-5 py-3 bg-white text-black font-semibold hover:bg-white/90 disabled:opacity-60 disabled:cursor-not-allowed">
+          连接
+        </button>
+        <div id="busy" class="hidden items-center gap-2 opacity-95">
+          <div class="spinner"></div>
+          <span>正在连接…</span>
+        </div>
+      </div>
+
+      <!-- 结果/提示 -->
+      <div id="msg" class="mt-6 text-sm"></div>
+
+      <!-- 成功卡片 -->
+      <div id="successCard" class="hidden mt-6 rounded-2xl bg-white text-black p-5">
+        <div class="text-lg font-semibold">连接成功！</div>
+        <div class="mt-2">设备 IP：<span id="ip" class="font-mono"></span></div>
+        <div class="mt-2 text-sm text-black/70">你可以用这个 IP 在浏览器中访问设备。</div>
+      </div>
+    </main>
+
+    <footer class="mt-10 text-center opacity-80 text-sm">
+      <span id="deviceInfo"></span>
+    </footer>
+  </div>
+
+  <script>
+    const els = {
+      ssid: document.getElementById('ssid'),
+      psk: document.getElementById('psk'),
+      togglePwd: document.getElementById('togglePwd'),
+      refresh: document.getElementById('refresh'),
+      connectBtn: document.getElementById('connectBtn'),
+      busy: document.getElementById('busy'),
+      msg: document.getElementById('msg'),
+      successCard: document.getElementById('successCard'),
+      ip: document.getElementById('ip'),
+      ssidHint: document.getElementById('ssidHint'),
+      deviceInfo: document.getElementById('deviceInfo'),
+    };
+
+    const state = {
+      polling: null,
+      ssids: [],
+      tries: 0
+    };
+
+    // 默认示例 Wi-Fi 列表（假数据）
+    const exampleSSIDs = [
+      "Home_Wifi_2.4G",
+      "629",
+      "Cafe_Free_Wifi",
+      "MyRouter_2.4G",
+      "OfficeNet"
+    ];
+
+    function setBusy(b) {
+      els.connectBtn.disabled = b;
+      els.refresh.disabled = b;
+      els.busy.classList.toggle('hidden', !b);
+    }
+
+    function showMsg(text, type='info') {
+      const color = {
+        info: 'text-white',
+        warn: 'text-yellow-200',
+        err:  'text-red-200',
+        ok:   'text-emerald-200',
+      }[type] || 'text-white';
+      els.msg.className = `mt-6 text-sm ${color}`;
+      els.msg.textContent = text || '';
+    }
+
+    function populateSSIDs(list) {
+      els.ssid.innerHTML = '';
+      list.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s; o.textContent = s;
+        els.ssid.appendChild(o);
+      });
+      els.ssidHint.textContent = list.length
+        ? `发现 ${list.length} 个网络`
+        : '未发现网络，请确认靠近路由器或稍后重试';
+    }
+
+    async function fetchSSIDs() {
+      try {
+        const r = await fetch('/api/ssids', { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        state.ssids = data.ssids || [];
+        populateSSIDs(state.ssids);
+        showMsg('已更新 Wi-Fi 列表', 'ok');
+      } catch (e) {
+        showMsg('获取 Wi-Fi 列表失败：' + e.message, 'err');
+      }
+    }
+
+    async function postConnect(ssid, psk) {
+      const form = new URLSearchParams({ ssid, psk });
+      const r = await fetch('/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: form.toString(),
+      });
+      return r.ok;
+    }
+
+    async function pollStatus(timeoutSec = 20) {
+      const start = Date.now();
+      while (Date.now() - start < timeoutSec * 1000) {
+        try {
+          const r = await fetch('/api/status?ts=' + Date.now(), { cache: 'no-store' });
+          if (r.ok) {
+            const data = await r.json();
+            if (data.connected && data.ip) {
+              els.ip.textContent = data.ip;
+              els.successCard.classList.remove('hidden');
+              showMsg('连接成功！', 'ok');
+              return true;
+            }
+          }
+        } catch (_) {}
+        await new Promise(res => setTimeout(res, 1000));
+      }
+      return false;
+    }
+
+    async function handleConnect() {
+      const ssid = els.ssid.value;
+      const psk  = els.psk.value;
+      if (!ssid) { showMsg('请先选择一个 Wi-Fi', 'warn'); return; }
+
+      els.successCard.classList.add('hidden');
+      showMsg('');
+      setBusy(true);
+      try {
+        const ok = await postConnect(ssid, psk);
+        if (!ok) throw new Error('提交失败');
+
+        showMsg('已提交，正在连接…', 'info');
+        const done = await pollStatus(25);
+        if (!done) showMsg('未能在限定时间内获取 IP，请稍后刷新重试。', 'warn');
+      } catch (e) {
+        showMsg('连接出错：' + e.message, 'err');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    // 事件
+    els.refresh.addEventListener('click', fetchSSIDs);
+    els.connectBtn.addEventListener('click', handleConnect);
+    els.togglePwd.addEventListener('click', () => {
+    const t = els.psk.type === 'password' ? 'text' : 'password';
+    els.psk.type = t;
+    els.togglePwd.setAttribute('data-state', t === 'password' ? 'hidden' : 'shown');
+    });
+
+
+    // 初始化
+    (async () => {
+      els.deviceInfo.textContent = '设备就绪：请连接 Wi-Fi';
+      // 先加载示例数据
+      populateSSIDs(exampleSSIDs);
+      // 再尝试获取真实数据
+      await fetchSSIDs();
+    })();
+</script>
+
+</body>
+</html>
