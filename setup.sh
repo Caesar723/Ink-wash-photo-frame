@@ -76,7 +76,7 @@ sudo systemctl start wifi-connect.service
 
 chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/start.sh
 chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/wifi-connect-static-ip.sh
-chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/script.sh
+
 
 # pip3 install RPi.GPIO -i https://pypi.tuna.tsinghua.edu.cn/simple
 # pip3 install pillow numpy -i https://pypi.tuna.tsinghua.edu.cn/simple
