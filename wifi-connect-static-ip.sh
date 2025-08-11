@@ -8,7 +8,8 @@ echo "检测网络连接状态..."
 
 # 连续检测 MAX_RETRY 次
 for ((i=1; i<=MAX_RETRY; i++)); do
-    if ping -q -c 1 -W 2 114.114.114.114 >/dev/null; then
+    if nmcli -t -f DEVICE,STATE dev | grep -q '^wlan0:connected$' \
+        || ping -q -c 1 -W 2 114.114.114.114 >/dev/null; then
         echo "已连接网络（第 $i 次检测）"
         exit 0
     else
