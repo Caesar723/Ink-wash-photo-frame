@@ -30,6 +30,10 @@ def get_router(appServer:"AppServer") -> APIRouter:
 
 
 
+    @router.get("/hotspot-detect.html")
+    async def hotspot_detect(request: Request):
+        print("hotspot-detect")
+        return FileResponse("wifiManager/template/home.html")
 
    
 
