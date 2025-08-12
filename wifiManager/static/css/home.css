@@ -1,70 +1,172 @@
-:root { color-scheme: light dark; }
-.glass {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(255,255,255,.14);
-}
-.spinner {
-  width: 18px; height: 18px; border: 2px solid transparent;
-  border-top-color: currentColor; border-right-color: currentColor;
-  border-radius: 50%; animation: spin .8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.nice-select {
-    -webkit-appearance: none; appearance: none;
-    background-color: #fff; color: #111827;
-    border: 1px solid #d1d5db; border-radius: 12px;
-    padding: 10px 36px 10px 40px; /* 右边给箭头，左边给Wi-Fi图标 */
-    width: 100%; line-height: 1.2;
-    box-shadow: 0 1px 2px rgba(0,0,0,.06);
-    /* 左：Wi-Fi 图标；右：下拉箭头（注意 %23 是 # 的转义） */
-    background-repeat: no-repeat, no-repeat;
-    background-position: 12px 50%, calc(100% - 12px) 50%;
-    background-size: 22px 22px, 14px 14px;
-    background-image:
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g stroke="%23999" stroke-width="2" fill="none" stroke-linecap="round"><path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5 12a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/></g><circle cx="12" cy="19" r="1.5" fill="%23999"/></svg>'),
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
-    }
-    .nice-select:focus {
-    outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99,102,241,.2);
-    }
-
-
-
-.nice-input { position: relative; }
-.nice-input input{
--webkit-appearance:none; appearance:none;
-width:100%;
-background:#fff; color:#111827;
-border:1px solid #d1d5db; border-radius:12px;
-padding:10px 48px 10px 44px; /* 左锁右眼睛 */
-line-height:1.2; box-shadow:0 1px 2px rgba(0,0,0,.06);
-background-repeat:no-repeat;
-background-position:12px 50%;
-background-size:20px 20px;
-/* 左侧锁图标（# 需转义为 %23） */
-background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2" ry="2" fill="none" stroke="%23999" stroke-width="2"/><path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="%23999" stroke-width="2" stroke-linecap="round"/></svg>');
-}
-.nice-input input:focus{
-outline:none; border-color:#6366f1;
-box-shadow:0 0 0 3px rgba(99,102,241,.2);
+:root{
+  /* 蓝白主题 */
+  --bg:#f5f9ff;
+  --bg-accent: radial-gradient(1200px 600px at 15% -10%, #e6f2ff 40%, transparent 60%),
+               radial-gradient(1000px 600px at 110% 10%, #eef6ff 30%, transparent 60%);
+  --card:#ffffffee;
+  --text:#0b1a33;
+  --muted:#5b6b88;
+  --primary:#1d6eff;
+  --primary-2:#155de4;
+  --border:#e3edff;
+  --ok:#0a8a4b;
+  --warn:#b56a09;
+  --err:#d12f2f;
+  --ring:#93b7ff;
+  --shadow: 0 12px 35px rgba(13,58,137,.12), 0 2px 10px rgba(13,58,137,.06);
 }
 
-.nice-input .toggle{
-position:absolute; right:6px; top:50%; transform:translateY(-50%);
-width:36px; height:36px; border:none; background:transparent;
-border-radius:8px; cursor:pointer; opacity:.85;
-background-repeat:no-repeat; background-position:center; background-size:22px 22px;
+html,body{height:100%;margin:0}
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  background: var(--bg);
+  background-image: var(--bg-accent);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
-/* 眼睛（显示密码） */
-.nice-input .toggle[data-state="hidden"]{
-background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="%23555" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="%23555" stroke-width="2"/></svg>');
+.safe{ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) }
+.container{max-width: 720px; margin: 0 auto; padding: 24px}
+
+header{ text-align:center; margin: 10px 0 20px }
+.badge{ display:inline-block; font-size:12px; color:#1d4ed8; background:#e6efff; border:1px solid #d6e3ff; padding:4px 10px; border-radius:999px; }
+h1{
+  margin:10px 0 6px; font-size: clamp(20px, 3.6vw, 28px);
+  background: linear-gradient(90deg, #0b1a33 0%, #1d6eff 60%);
+  -webkit-background-clip: text; background-clip:text; color: transparent;
+  letter-spacing:.2px;
 }
-/* 眼睛 + 斜杠（隐藏密码） */
-.nice-input .toggle[data-state="shown"]{
-background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="%23555" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="%23555" stroke-width="2"/><line x1="3" y1="3" x2="21" y2="21" stroke="%23b91c1c" stroke-width="2" stroke-linecap="round"/></svg>');
+header p{ margin:0; color: var(--muted); font-size: 14px }
+
+.card{
+  position:relative; overflow: clip;
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow: var(--shadow);
+  padding:18px;
+  backdrop-filter: blur(8px) saturate(120%);
 }
-.nice-input .toggle:hover{ opacity:1; }
+.card::before{
+  content:""; position:absolute; inset:0; border-radius:18px; pointer-events:none;
+  padding:1px; background: linear-gradient(135deg, #d7e7ff, #f1f7ff);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+
+.row{ margin-bottom:16px }
+label{ display:block; font-size:14px; margin:0 0 8px }
+
+/* 滑动选择器（极简卡片） */
+.picker-wrap{ position:relative }
+.picker{
+  display:flex; gap:12px;
+  overflow-x:auto; overscroll-behavior-x: contain;
+  scroll-snap-type:x mandatory;
+  padding:6px 8px 10px;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding: 0 24px;
+  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+}
+.picker::-webkit-scrollbar{ height:8px }
+.picker::-webkit-scrollbar-thumb{ background:#d6e3ff; border-radius:999px }
+
+.ssid-card{
+  scroll-snap-align:center;
+  min-width: 180px; max-width: 85%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+  padding:12px 14px;
+  box-shadow: 0 2px 0 rgba(29,110,255,.05);
+  cursor:pointer;
+  transition: transform .06s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  display:flex; align-items:center; justify-content:center;
+}
+.ssid-card:hover{ transform: translateY(-1px) }
+.ssid-card:focus-visible{ outline:2px solid var(--ring); outline-offset: 2px }
+.ssid-card.active{
+  border-color: color-mix(in oklab, var(--primary) 65%, #fff);
+  background: linear-gradient(180deg, #ffffff, #f6fbff);
+  box-shadow: 0 10px 26px rgba(29,110,255,.18);
+}
+.ssid-name{
+  font-weight:700; font-size:15px;
+  max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+.nav{
+  position:absolute; inset-block:0; display:flex; align-items:center; justify-content:space-between; pointer-events:none;
+}
+.nav button{
+  pointer-events:auto; width:38px; height:38px; border-radius:999px;
+  border:1px solid var(--border); background:#ffffff; cursor:pointer;
+  box-shadow: 0 6px 20px rgba(13,58,137,.12);
+  display:grid; place-items:center; font-size:18px; user-select:none;
+  transition: transform .06s ease, box-shadow .15s ease;
+}
+.nav button:hover{ transform: translateY(-1px) }
+.nav-left{ position:absolute; left:-10px; top:50%; translate:0 -50% }
+.nav-right{ position:absolute; right:-10px; top:50%; translate:0 -50% }
+
+.hint{ color: var(--muted); font-size:12px; margin-top:6px }
+
+.flex{ display:flex; gap:10px; align-items:stretch }
+.fill{ flex:1 }
+
+input[type="password"]{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:11px 12px;
+  outline:none; background:#fff; color:var(--text);
+}
+input[type="password"]:focus-visible{
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 35%, transparent);
+}
+
+.btn{
+  border:1px solid var(--border);
+  background: linear-gradient(180deg, #ffffff, #f6faff);
+  border-radius:12px;
+  padding:11px 14px;
+  cursor:pointer; font-weight:700;
+  transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
+  box-shadow: 0 2px 0 rgba(13,58,137,.04);
+}
+.btn:hover{ transform: translateY(-1px) }
+.btn:active{ transform: translateY(0) scale(.99) }
+.btn-primary{
+  color:#fff; background: linear-gradient(180deg, var(--primary), var(--primary-2));
+  border-color: color-mix(in oklab, var(--primary) 80%, #000);
+  box-shadow: 0 10px 26px rgba(29,110,255,.25);
+}
+.btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; filter:grayscale(.1) }
+
+#msg{ font-size:14px; margin-top:8px; min-height:1.4em }
+.msg-info{ color: var(--text) }
+.msg-ok{ color: var(--ok) }
+.msg-warn{ color: var(--warn) }
+.msg-err{ color: var(--err) }
+
+.success{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px; margin-top:12px;
+  background:#f6fbff; display:none; opacity:0; transform: translateY(4px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.success.show{ display:block; opacity:1; transform: translateY(0) }
+code{ background:#eef4ff; padding:3px 8px; border-radius:7px }
+
+.spinner{
+  width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:999px;
+  display:inline-block; vertical-align:middle; animation:spin 1s linear infinite
+}
+@keyframes spin{ to{ transform: rotate(360deg) } }
+
+footer{ text-align:center; margin:16px 0 0; color: var(--muted); font-size:12px }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition:none !important }
+}
