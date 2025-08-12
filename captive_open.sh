@@ -71,11 +71,11 @@ start(){
   iptables -t nat -C PREROUTING -i "$IFACE" -p tcp --dport 80 -j REDIRECT --to-ports 80 2>/dev/null \
     || iptables -t nat -A PREROUTING -i "$IFACE" -p tcp --dport 80 -j REDIRECT --to-ports 80
 
-  exec /home/xuanpeichen/myenv/bin/python3 "$APP"
+  #exec /home/xuanpeichen/myenv/bin/python3 "$APP"
 }
 
 stop(){
-  pkill -f "$APP" || true
+  #pkill -f "$APP" || true
   iptables -t nat -D PREROUTING -i "$IFACE" -p tcp --dport 80 -j REDIRECT --to-ports 80 2>/dev/null || true
   systemctl stop hostapd || true
   systemctl stop dnsmasq || true
@@ -89,7 +89,19 @@ status(){
   echo "NAT PREROUTING:"
   iptables -t nat -S PREROUTING | grep REDIRECT || true
 }
+get_sta_ip() {
+  ip=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") {print $(i+1); exit}}')
+  [ -n "$ip" ] || ip=$(nmcli -g IP4.ADDRESS device show "$IFACE" 2>/dev/null | head -n1 | cut -d/ -f1)
+  echo "$ip"
+}
 
+start_app(){
+
+  SCAN_RESULTS="$(nmcli -t -f CHAN,SSID dev wifi | grep -v '^$')"
+  export WIFI_SCAN_RESULTS="$SCAN_RESULTS"
+  start()
+  exec /home/xuanpeichen/myenv/bin/python3 "$APP"
+}
 case "${1:-}" in
   setup)  install_deps; write_configs; echo "已写配置，运行：sudo $0 start" ;;
   start)  start ;;

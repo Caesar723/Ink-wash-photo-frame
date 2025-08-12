@@ -2,49 +2,36 @@ from fastapi import APIRouter, Request
 from typing import TYPE_CHECKING
 
 import numpy as np
-
+import os
 from fastapi import UploadFile, File,HTTPException,Form
 from fastapi.responses import StreamingResponse,Response,FileResponse
 
-from utils.helper import run_cmd, get_wifi_iface
+from utils.helper import run_cmd, get_wifi_iface,parse_scan_results
 
 if TYPE_CHECKING:
     from main import AppServer
 
 
+
 def get_router(appServer:"AppServer") -> APIRouter:
     router = APIRouter(prefix="/api")
 
+    # 从环境变量读取
+    scan_results = os.getenv("WIFI_SCAN_RESULTS", "")
 
     
 
     @router.get("/ssids")
     async def get_ssids(request: Request):
-        print("client:", request.client.host)
-        iface = await get_wifi_iface()
+        
+        ssids = parse_scan_results(scan_results)
+        return {"ssids": ssids}
 
-        # trigger a rescan (non-blocking in NM; listing below will read latest cache)
-        res = await run_cmd("nmcli", "dev", "wifi", "rescan", "ifname", iface)
-        print(res)
-
-        code, out, err = await run_cmd("nmcli", "-t", "-f", "SSID", "dev", "wifi", "list", "ifname", iface)
-        if code != 0:
-            raise HTTPException(status_code=500, detail=f"nmcli error: {err or 'failed to list ssids'}")
-
-        # Clean, de-dup, keep order
-        raw = [s.strip() for s in out.splitlines() if s.strip()]
-        seen, ordered = set(), []
-        for s in raw:
-            if s not in seen:
-                ordered.append(s)
-                seen.add(s)
-
-        return {"ssids": ordered}
 
 
     @router.post("/connect")
     async def connect(request: Request, ssid: str = Form(...), psk: str = Form(default="")):
-        print("client:", request.client.host)
+        code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "stop")
         iface = await get_wifi_iface()
 
         # Try connecting. If psk为空，nmcli 会尝试以开放网络连接
