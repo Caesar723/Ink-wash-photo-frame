@@ -107,5 +107,6 @@ case "${1:-}" in
   start)  start ;;
   stop)   stop ;;
   status) status ;;
+  start_app) start_app ;;
   *) echo "用法: sudo $0 {setup|start|stop|status}"; exit 1 ;;
 esac
