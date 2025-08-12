@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from fastapi import UploadFile, File,HTTPException
+from fastapi import UploadFile, File,HTTPException,Form
 from fastapi.responses import StreamingResponse,Response,FileResponse
 
 from utils.helper import run_cmd, get_wifi_iface
