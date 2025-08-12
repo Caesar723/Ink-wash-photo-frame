@@ -108,13 +108,6 @@ try{
     const data = await r.json();
     const list = Array.isArray(data.ssids) ? data.ssids : [];
 
-    // 2.4G 优先
-    list.sort((a,b)=>{
-    const a24 = /2\.4|2g|2_4|24/gi.test(a) && !/5g|5\.0/gi.test(a);
-    const b24 = /2\.4|2g|2_4|24/gi.test(b) && !/5g|5\.0/gi.test(b);
-    return (b24 - a24) || a.localeCompare(b, 'zh-CN');
-    });
-
     ssids = list;
     renderPicker();
     showMsg('已更新 Wi-Fi 列表','ok');
