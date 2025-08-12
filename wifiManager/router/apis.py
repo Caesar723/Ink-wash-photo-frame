@@ -24,7 +24,8 @@ def get_router(appServer:"AppServer") -> APIRouter:
         iface = await get_wifi_iface()
 
         # trigger a rescan (non-blocking in NM; listing below will read latest cache)
-        await run_cmd("nmcli", "dev", "wifi", "rescan", "ifname", iface)
+        res = await run_cmd("nmcli", "dev", "wifi", "rescan", "ifname", iface)
+        print(res)
 
         code, out, err = await run_cmd("nmcli", "-t", "-f", "SSID", "dev", "wifi", "list", "ifname", iface)
         if code != 0:
