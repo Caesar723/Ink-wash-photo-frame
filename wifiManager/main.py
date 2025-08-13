@@ -76,7 +76,7 @@ class AppServer:
                 self.wifi_connect_counter += 1
                 print("wifi disconnected")
                 if self.wifi_connect_counter > 10:
-                    print("wifi disconnected for 3 times, restart wifi")
+                    print("wifi disconnected for 10 times, restart wifi")
                     code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
                     print(out)
                     self.wifi_connect_counter = 0
