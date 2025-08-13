@@ -64,7 +64,7 @@ class AppServer:
 
     async def check_wifi_connect(self):
         code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE", "device", "|", "grep", "^wlan0:")
-        print(out)
+        print(code,out,err)
         if code==0:
             status = out.split(":")[1].strip()
             self.wifi_reconnect_counter=0
@@ -89,8 +89,8 @@ class AppServer:
                 await asyncio.sleep(5)
                 
                 code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE", "device", "|", "grep", "^wlan0:")
-                status = out.split(":")[1].strip()
-                if code !=0 or status != "connected":
+                print(code, out, err)
+                if code !=0 or out.split(":")[1].strip() != "connected":
                     print("wifi reconnect failed when restart wifi, restart wifi")
                     code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
                     
