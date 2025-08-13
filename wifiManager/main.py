@@ -1,10 +1,10 @@
 
 
-
+import asyncio
 from fastapi.templating import Jinja2Templates
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import uvicorn
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from wifiManager.router import page,apis
-
+from utils.helper import run_cmd
 
 
 class AppServer:
@@ -30,11 +30,16 @@ class AppServer:
 
        
         self.app = FastAPI()
+        self.scheduler = AsyncIOScheduler()
+        self.scan_results = os.getenv("WIFI_SCAN_RESULTS", "")
         
         self.app.mount("/static", StaticFiles(directory="wifiManager/static"), name="static")
 
         
         self.setup_routes()
+
+        self.wifi_connect_counter = 0
+        self.wifi_reconnect_counter = 0
 
         
 
@@ -42,16 +47,56 @@ class AppServer:
 
         @self.app.on_event("startup")
         async def start_worker():
-            print("start_worker")
+            self.scheduler.add_job(self.check_wifi_connect, "interval", seconds=5)
+            self.scheduler.start()
             
         
         
         # for r in self.app.router.routes:
         #     print(f"[ROUTE] {r.path} → {getattr(r, 'methods', '')}")
 
-
         
-    
+    async def update_ssids(self):
+        code, out, err = await run_cmd("nmcli", "-t", "-f", "CHAN,SIGNAL,SSID", "dev", "wifi", "|", "grep", "-v", "^$")
+        if code==0:
+            self.scan_results = out
+        
+
+    async def check_wifi_connect(self):
+        code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE", "device", "|", "grep", "^wlan0:")
+        print(out)
+        if code==0:
+            status = out.split(":")[1].strip()
+            self.wifi_reconnect_counter=0
+            await self.update_ssids()
+            if status == "connected":
+                print("wifi connected")
+            else:
+                self.wifi_connect_counter += 1
+                print("wifi disconnected")
+                if self.wifi_connect_counter > 10:
+                    print("wifi disconnected for 3 times, restart wifi")
+                    code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
+                    print(out)
+                    self.wifi_connect_counter = 0
+        else:
+            self.wifi_reconnect_counter+=1
+            if self.wifi_reconnect_counter > 10:
+                self.wifi_reconnect_counter = 0
+                print("wifi reconnect for 3 times, restart wifi")
+                await run_cmd("systemctl", "start", "NetworkManager")
+
+                await asyncio.sleep(5)
+                
+                code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE", "device", "|", "grep", "^wlan0:")
+                status = out.split(":")[1].strip()
+                if code !=0 or status != "connected":
+                    print("wifi reconnect failed when restart wifi, restart wifi")
+                    code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
+                    
+                    
+                
+            
 
     def setup_routes(self):
         # home 需要 templates 和 handler → 用工厂函数

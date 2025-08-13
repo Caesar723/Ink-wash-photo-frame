@@ -17,14 +17,15 @@ def get_router(appServer:"AppServer") -> APIRouter:
     router = APIRouter(prefix="/api")
 
     # 从环境变量读取
-    scan_results = os.getenv("WIFI_SCAN_RESULTS", "")
+    
 
     
 
     @router.get("/ssids")
     async def get_ssids(request: Request):
+
         
-        ssids = parse_scan_results(scan_results)
+        ssids = parse_scan_results(appServer.scan_results)
         return {"ssids": ssids}
 
 
@@ -52,6 +53,15 @@ def get_router(appServer:"AppServer") -> APIRouter:
             code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
             print(0,out)
             return {"ok": False, "message": err or out or "connect failed"}
+
+        else:
+            auto_cmd = ["sudo", "nmcli", "connection", "modify", ssid, "connection.autoconnect", "yes"]
+            code, out, err = await run_cmd(*auto_cmd)
+            print(2,out)
+            retry_cmd = ["sudo", "nmcli", "connection", "modify", ssid, "connection.autoconnect-retries", "-1"]
+            code, out, err = await run_cmd(*retry_cmd)
+            print(3,out)
+
         print(1,out)
         return {"ok": True, "message": out or "connected"}
 
