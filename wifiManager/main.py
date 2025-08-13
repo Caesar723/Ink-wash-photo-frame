@@ -57,13 +57,13 @@ class AppServer:
 
         
     async def update_ssids(self):
-        code, out, err = await run_cmd("nmcli", "-t", "-f", "CHAN,SIGNAL,SSID", "dev", "wifi", "|", "grep", "-v", "^$")
+        code, out, err = await run_cmd("nmcli -t -f CHAN,SIGNAL,SSID dev wifi | grep -v '^$'")
         if code==0:
             self.scan_results = out
         
 
     async def check_wifi_connect(self):
-        code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE", "device", "|", "grep", "^wlan0:")
+        code, out, err = await run_cmd("nmcli -t -f DEVICE,STATE device | grep '^wlan0:'")
         print(code,out,err)
         if code==0:
             status = out.split(":")[1].strip()
@@ -88,7 +88,7 @@ class AppServer:
 
                 await asyncio.sleep(5)
                 
-                code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE", "device", "|", "grep", "^wlan0:")
+                code, out, err = await run_cmd("nmcli -t -f DEVICE,STATE device | grep '^wlan0:'")
                 print(code, out, err)
                 if code !=0 or out.split(":")[1].strip() != "connected":
                     print("wifi reconnect failed when restart wifi, restart wifi")
