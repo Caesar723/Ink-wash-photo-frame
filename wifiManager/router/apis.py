@@ -39,6 +39,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
         if psk:
             cmd += ["password", psk]
 
+        print(" ".join(cmd))
         code, out, err = await run_cmd(*cmd)
         print(out)
         if code != 0:

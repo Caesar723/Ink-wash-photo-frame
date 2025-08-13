@@ -96,7 +96,7 @@ get_sta_ip() {
 }
 
 start_app(){
-  systemctl start NetworkManager || true
+  systemctl start NetworkManager
   SCAN_RESULTS="$(nmcli -t -f CHAN,SIGNAL,SSID dev wifi | grep -v '^$')"
   export WIFI_SCAN_RESULTS="$SCAN_RESULTS"
   start
