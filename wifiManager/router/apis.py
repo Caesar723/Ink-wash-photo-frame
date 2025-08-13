@@ -35,13 +35,13 @@ def get_router(appServer:"AppServer") -> APIRouter:
         iface = await get_wifi_iface()
 
         # Try connecting. If psk为空，nmcli 会尝试以开放网络连接
-        cmd = ["nmcli", "dev", "wifi", "connect", ssid, "ifname", iface]
+        cmd = ["sudo", "nmcli", "dev", "wifi", "connect", ssid, "ifname", iface]
         if psk:
             cmd += ["password", psk]
 
         print(" ".join(cmd))
         code, out, err = await run_cmd(*cmd)
-        print(out)
+        print(code, out, err)
         if code != 0:
             # 有时需要先删除旧连接再连一次
             # 取消注释以下两行可在失败时重试（谨慎使用）：
