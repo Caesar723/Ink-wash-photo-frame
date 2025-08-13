@@ -40,6 +40,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
             cmd += ["password", psk]
 
         code, out, err = await run_cmd(*cmd)
+        print(out)
         if code != 0:
             # 有时需要先删除旧连接再连一次
             # 取消注释以下两行可在失败时重试（谨慎使用）：
