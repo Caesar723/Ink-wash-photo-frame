@@ -45,6 +45,7 @@ def get_router(appServer:"AppServer") -> APIRouter:
             # 取消注释以下两行可在失败时重试（谨慎使用）：
             # await run_cmd("nmcli", "connection", "delete", ssid)
             # code, out, err = await run_cmd(*cmd)
+            code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
 
             return {"ok": False, "message": err or out or "connect failed"}
 
@@ -56,7 +57,9 @@ def get_router(appServer:"AppServer") -> APIRouter:
         print("client:", request.client.host)
         iface = await get_wifi_iface()
 
+        # nmcli -t -f DEVICE,STATE,CONNECTION dev status
         code, out, err = await run_cmd("nmcli", "-t", "-f", "DEVICE,STATE,CONNECTION", "dev", "status")
+        print(out)
         if code != 0:
             raise HTTPException(status_code=500, detail=f"nmcli error: {err or 'failed to read status'}")
 
