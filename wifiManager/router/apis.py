@@ -46,9 +46,9 @@ def get_router(appServer:"AppServer") -> APIRouter:
             # await run_cmd("nmcli", "connection", "delete", ssid)
             # code, out, err = await run_cmd(*cmd)
             code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "start")
-
+            print(0,out)
             return {"ok": False, "message": err or out or "connect failed"}
-
+        print(1,out)
         return {"ok": True, "message": out or "connected"}
 
 
