@@ -67,7 +67,7 @@ class AppServer:
         code, out, err = await run_cmd("nmcli", "-t", "-g", "GENERAL.STATE", "device", "show", "wlan0")
         print(code,out,err)
         if code==0:
-            status = out.split(":")[1].strip()
+            status = out
             self.wifi_reconnect_counter=0
             await self.update_ssids()
             if status == "100 (connected)":
