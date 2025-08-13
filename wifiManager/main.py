@@ -85,7 +85,7 @@ class AppServer:
             if self.wifi_reconnect_counter > 10:
                 self.wifi_reconnect_counter = 0
                 print("wifi reconnect for 3 times, restart wifi")
-                await run_cmd("systemctl", "start", "NetworkManager")
+                await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "stop")
 
                 await asyncio.sleep(5)
                 
