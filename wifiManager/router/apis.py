@@ -5,7 +5,7 @@ import numpy as np
 import os
 from fastapi import UploadFile, File,HTTPException,Form
 from fastapi.responses import StreamingResponse,Response,FileResponse
-
+import asyncio
 from utils.helper import run_cmd, get_wifi_iface,parse_scan_results
 
 if TYPE_CHECKING:
@@ -33,6 +33,8 @@ def get_router(appServer:"AppServer") -> APIRouter:
     async def connect(request: Request, ssid: str = Form(...), psk: str = Form(default="")):
         code, out, err = await run_cmd("sudo", "bash", "/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh", "stop")
         iface = await get_wifi_iface()
+
+        await asyncio.sleep(3)
 
         # Try connecting. If psk为空，nmcli 会尝试以开放网络连接
         cmd = ["sudo", "nmcli", "dev", "wifi", "connect", ssid, "ifname", iface]
