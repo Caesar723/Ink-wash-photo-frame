@@ -57,7 +57,7 @@ class AppServer:
 
         
     async def update_ssids(self):
-        code, out, err = await run_cmd("nmcli -t -f CHAN,SIGNAL,SSID dev wifi")
+        code, out, err = await run_cmd("nmcli", "-t", "-f", "CHAN,SIGNAL,SSID", "dev", "wifi")
         print(code,out,err)
         if code==0:
             self.scan_results = out
