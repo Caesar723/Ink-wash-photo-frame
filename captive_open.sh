@@ -100,6 +100,7 @@ start_app(){
   SCAN_RESULTS="$(nmcli -t -f CHAN,SIGNAL,SSID dev wifi | grep -v '^$')"
   export WIFI_SCAN_RESULTS="$SCAN_RESULTS"
   #start
+  cd /home/xuanpeichen/Desktop/Ink-wash-photo-frame
   exec /home/xuanpeichen/myenv/bin/python3 "$APP"
 }
 case "${1:-}" in
