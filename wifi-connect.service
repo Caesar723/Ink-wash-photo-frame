@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/Users/xuanpeichen/Desktop/code/python/Ink-wash-photo-frame/captive_open.sh start_app
+ExecStart=/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh start_app
 Restart=on-failure
 User=xuanpeichen
 
