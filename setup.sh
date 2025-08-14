@@ -55,7 +55,7 @@ pip3 install playwright -i https://pypi.tuna.tsinghua.edu.cn/simple
 playwright install
 
 
-
+sudo bash /home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh setup
 
 sudo raspi-config nonint do_spi 0
 
@@ -75,7 +75,7 @@ sudo systemctl enable wifi-connect.service
 sudo systemctl start wifi-connect.service
 
 chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/start.sh
-chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/wifi-connect-static-ip.sh
+chmod +x /home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh
 
 
 # pip3 install RPi.GPIO -i https://pypi.tuna.tsinghua.edu.cn/simple
