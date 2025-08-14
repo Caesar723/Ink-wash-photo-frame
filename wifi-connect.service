@@ -6,7 +6,6 @@ After=network.target
 Type=simple
 ExecStart=/home/xuanpeichen/Desktop/Ink-wash-photo-frame/captive_open.sh start_app
 Restart=on-failure
-User=xuanpeichen
 
 [Install]
 WantedBy=multi-user.target
