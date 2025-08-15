@@ -39,10 +39,6 @@ sudo apt-get update
 sudo apt-get install -y libgtk-4-1 libgraphene-1.0-0
 
 
-wget https://ghfast.top/https://github.com/balena-os/wifi-connect/releases/download/v4.4.6/wifi-connect-v4.4.6-linux-aarch64.tar.gz
-tar -zxvf wifi-connect-v4.4.6-linux-aarch64.tar.gz
-sudo install -m 0755 wifi-connect /usr/local/sbin/wifi-connect
-/usr/local/sbin/wifi-connect --version
 
 
 
