@@ -35,7 +35,7 @@ els.msg.textContent = text || '';
 function renderPicker(){
 els.picker.innerHTML = '';
 const items = [
-    { name:'默认（自动选择，2.4G 优先）', value:'__auto__' },
+    // { name:'默认（自动选择，2.4G 优先）', value:'__auto__' },
     ...ssids.map(s => ({ name:s, value:s })),
 ];
 
