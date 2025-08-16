@@ -23,6 +23,9 @@ if TYPE_CHECKING:
 def get_router(appServer:"AppServer") -> APIRouter:
     router = APIRouter()
     
+    @router.get("/favicon.ico", include_in_schema=False)
+    async def favicon():
+        return FileResponse("webManager/static/images/webImages/icon.png", media_type="image/png")
 
     
     @router.get("/whether")
