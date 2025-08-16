@@ -19,10 +19,12 @@ if __name__ == "__main__":
 
 from wifiManager.router import page,apis
 from utils.helper import run_cmd
-
+from webManager.utils.helper import read_yaml
 
 class AppServer:
     def __init__(self):
+
+        self.webconfig = read_yaml("webManager/config/basic.yaml")
 
         
         

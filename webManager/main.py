@@ -64,7 +64,7 @@ class AppServer:
         # for r in self.app.router.routes:
         #     print(f"[ROUTE] {r.path} → {getattr(r, 'methods', '')}")
 
-
+        self.run(port=self.config["basic_port"])
         
     
 
@@ -85,6 +85,6 @@ class AppServer:
 
 # ▶ 运行：
 if __name__ == "__main__":
-    AppServer(config_path="webManager/config/basic.yaml").run(port=23433)
+    AppServer(config_path="webManager/config/basic.yaml")
 
 

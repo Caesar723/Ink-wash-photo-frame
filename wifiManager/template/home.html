@@ -10,7 +10,7 @@
 <div class="safe">
   <div class="container">
     <header>
-      <h1>连接到 Wi-Fi</h1>
+      <h1>连接 Wi-Fi</h1>
       <p>滑动选择一个网络或使用默认项，然后输入密码连接</p>
     </header>
 
@@ -35,6 +35,18 @@
         </div>
       </div>
 
+
+      <div class="row flex" style="align-items:center; justify-content:space-between">
+        <div>
+          <div class="hint">连接前请提前复制以下链接，连接成功后可去浏览器访问：</div>
+          <div style="margin-top:5px;">
+            <code id="localLink">http://{{ hostname }}.local:{{ port }}</code>
+            <button class="btn" id="copyBtn" type="button">复制</button>
+          </div>
+          <span id="copyHint" class="hint"></span>
+        </div>
+      </div>
+
       <!-- 操作 -->
       <div class="row flex" style="align-items:center; justify-content:space-between">
         <div class="flex" style="gap:10px">
@@ -43,6 +55,9 @@
         </div>
         <div class="hint">按 Enter 也可提交</div>
       </div>
+
+
+      
 
       <div id="msg" class="msg-info" role="status" aria-live="polite"></div>
 

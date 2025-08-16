@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Request
 from typing import TYPE_CHECKING
-
+import socket
 import numpy as np
 
 from fastapi import UploadFile, File
@@ -26,7 +26,15 @@ def get_router(appServer:"AppServer") -> APIRouter:
     @router.get("/")
     async def index(request: Request):
         print("index")
-        return FileResponse("wifiManager/template/home.html")
+        
+        hostname = socket.gethostname()
+        port = appServer.webconfig["basic_port"]
+        return appServer.templates.TemplateResponse("home.html", {
+            "request": request,
+            "hostname": hostname,
+            "port": port
+        })
+        
 
 
 

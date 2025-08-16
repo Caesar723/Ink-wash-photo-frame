@@ -211,3 +211,45 @@ els.deviceInfo.textContent = '设备就绪：请连接 Wi-Fi';
 renderPicker();      // 先渲染默认项
 await fetchSSIDs();  // 拉真实数据
 })();
+
+
+
+
+
+async function copyText(text) {
+    // 1) 现代剪贴板 API（仅 HTTPS/localhost 可用）
+    if (window.isSecureContext && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    // 2) 回退：textarea + execCommand('copy')（HTTP 也可用）
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      document.body.appendChild(ta);
+
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length); // 兼容 iOS
+
+      const ok = document.execCommand('copy');   // 已弃用但仍广泛可用
+      document.body.removeChild(ta);
+      return ok;
+    } catch (e) {
+      return false;
+    }
+  }
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+    try {
+        const link=document.getElementById("localLink").textContent;
+        const ok = await copyText(link);
+        document.getElementById("copyHint").textContent = ok ? `已复制：${link}` : "复制失败，请手动选择复制";
+    } catch (err) {
+        document.getElementById("copyHint").textContent = "复制失败，请手动复制";
+        console.error("复制失败：", err);
+    }
+});
