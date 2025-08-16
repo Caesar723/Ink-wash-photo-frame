@@ -5,7 +5,7 @@ basic_port: 23433
 basic_store_path: webManager/static/images/shored_img
 chat_api_token: sk-SWLjAPztaxyu5dQnfhT2EyxFD4idjsqWVHUZ5MESTIGRVuis
 chat_base_url: https://www.dmxapi.com/v1
-chat_model: Doubao-1.5-lite-32k
+chat_model: Doubao-1.5-pro-32k
 image_selector_interval:
   days: 0
   hours: 0
