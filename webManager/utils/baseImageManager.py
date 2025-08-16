@@ -4,7 +4,7 @@ import os
 import cv2
 from PIL import Image
 
-test=1
+test=0
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
