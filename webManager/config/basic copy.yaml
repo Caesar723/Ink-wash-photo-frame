@@ -9,7 +9,7 @@ target_img_size: [800, 480]
 
 chat_base_url: "https://www.dmxapi.com/v1"
 chat_api_token: "sk-SWLjAPztaxyu5dQnfhT2EyxFD4idjsqWVHUZ5MESTIGRVuis"
-chat_model: "Doubao-1.5-lite-32k"
+chat_model: "Doubao-1.5-pro-32k"
 
 
 pre_content: |
