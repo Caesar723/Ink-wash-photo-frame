@@ -27,13 +27,13 @@ def get_router(appServer:"AppServer") -> APIRouter:
     async def index(request: Request):
         print("index")
         
-        hostname = socket.gethostname()
-        port = appServer.webconfig["basic_port"]
-        return appServer.templates.TemplateResponse("home.html", {
-            "request": request,
-            "hostname": hostname,
-            "port": port
-        })
+        
+        # return appServer.templates.TemplateResponse("home.html", {
+        #     "request": request,
+        #     "hostname": hostname,
+        #     "port": port
+        # })
+        return FileResponse("wifiManager/template/home.html")
         
 
 

@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Request
 from typing import TYPE_CHECKING
+import socket
+
+
 
 import numpy as np
 import os
@@ -17,7 +20,11 @@ def get_router(appServer:"AppServer") -> APIRouter:
     router = APIRouter(prefix="/api")
 
     # 从环境变量读取
-    
+    @router.get("/get_hostname")
+    async def get_hostname(request: Request):
+        hostname = socket.gethostname()
+        port = appServer.webconfig["basic_port"]
+        return {"hostname": hostname, "port": port}
 
     
 

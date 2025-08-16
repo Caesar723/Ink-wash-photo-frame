@@ -243,6 +243,17 @@ async function copyText(text) {
     }
   }
 
+
+async function initCopyBtn(){
+
+    const response=await fetch("/api/get_hostname")
+    const data=await response.json()
+    const hostname=data.hostname
+    const port=data.port
+    document.getElementById("localLink").textContent = `http://${hostname}.local:${port}`;
+}
+
+initCopyBtn()
 document.getElementById("copyBtn").addEventListener("click", async () => {
     try {
         const link=document.getElementById("localLink").textContent;
