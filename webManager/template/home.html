@@ -31,6 +31,7 @@
         <button class="nav-btn active" data-target="gallery" title="图片"><i class="bi bi-images"></i></button>
         <button class="nav-btn" data-target="upload" title="上传"><i class="bi bi-upload"></i></button>
         <button class="nav-btn" data-target="settings" title="设置"><i class="bi bi-gear"></i></button>
+        <button class="nav-btn" data-target="advance_setting" title="高级设置"><i class="bi bi-robot"></i></button>
       </aside>
       <main>
         <!-- 图片展示 面板 -->
@@ -136,6 +137,31 @@
                   
               </div>
         </div>
+        <div id="advance_setting" class="panel p-3" style="display:none;">  
+          <div class="container">
+          <h5 class="mb-3">AI 设置</h5>
+          <form>
+            <div class="mb-3">
+              <label for="chat_api_token" class="form-label">API Token</label>
+              <input type="text" class="form-control" id="chat_api_token" placeholder="请输入API Token">
+            </div>
+        
+            <div class="mb-3">
+              <label for="chat_base_url" class="form-label">API 地址（例如：https://api.openai.com/v1）</label>
+              <input type="text" class="form-control" id="chat_base_url" placeholder="请输入API 地址">
+            </div>
+        
+            <div class="mb-3">
+              <label for="chat_model" class="form-label">模型</label>
+              <input type="text" class="form-control" id="chat_model" placeholder="请输入模型">
+            </div>
+        
+            <button class="btn-submit" id="submit-chatai-info">
+              <i class="bi bi-robot me-2"></i> 提交信息
+            </button>
+          </form>
+          </div>
+        </div>
       </main>
     </div>
   </div>
@@ -177,6 +203,7 @@
 
   <script src="static/js/requestSender.js"></script>
   <script src="static/js/setting.js"></script>
+  <script src="static/js/advance_setting.js"></script>
   <script src="static/js/image_gallary.js"></script>
   <script type="module" src="static/js/citySelect.js"></script>
   

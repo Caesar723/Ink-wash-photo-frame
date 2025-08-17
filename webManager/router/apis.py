@@ -215,6 +215,27 @@ def get_router(appServer:"AppServer") -> APIRouter:
     async def change_image(request: Request):
         await appServer.baseImageSelector.select_image()
         return {"status":"success"}
+
+    @router.post("/chatai_info")
+    async def chatai_info(request: Request):
+        result={
+            "chat_api_token":appServer.config["chat_api_token"],
+            "chat_base_url":appServer.config["chat_base_url"],
+            "chat_model":appServer.config["chat_model"]
+        }
+        return result
+
+    @router.post("/set_chatai_info")
+    async def set_chatai_info(request: Request):
+        data=await request.json()
+
+        async with appServer.config as config:
+            config["chat_api_token"]=data["chat_api_token"]
+            config["chat_base_url"]=data["chat_base_url"]
+            config["chat_model"]=data["chat_model"]
+        return {"status":"success"}
+
+
        
 
    
