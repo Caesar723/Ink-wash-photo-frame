@@ -1,7 +1,31 @@
-const configs = [
-    { id: 'days',    max: 30, label: '天' },
-    { id: 'hours',   max: 23, label: '时' },
-    { id: 'minutes', max: 59, label: '分' },
+  
+  
+async function init_time(){
+  const response=await fetch('/api/get_time', {
+    method: 'POST',
+  });
+  let days;
+  let hours;
+  let minutes;
+  if(response.ok){
+    const data=await response.json();
+    console.log(data);
+
+    days=data.days;
+    hours=data.hours;
+    minutes=data.minutes;
+  }
+  else{
+    days=0;
+    hours=0;
+    minutes=0;
+  }
+  
+
+  const configs = [
+    { id: 'days',    max: 30, label: '天' ,value:days+2},
+    { id: 'hours',   max: 23, label: '时' ,value:hours+2},
+    { id: 'minutes', max: 59, label: '分' ,value:minutes+2},
   ];
   const itemH = 40;
 
@@ -47,30 +71,54 @@ const configs = [
 
     // 首次对齐到 0，并高亮
     setTimeout(() => {
-      sp.scrollTop = 0 * itemH - (sp.clientHeight - itemH) / 2;
-      highlight(sp, 2);
-      alignMask(sp,2);
+      document.getElementById("settings").style.display="block";
+      
+      const idx=cfg.value;
+      
+      const centerOffset = (sp.clientHeight - itemH) / 2;
+      sp.scrollTop = idx * itemH - centerOffset;
+      console.log(sp.scrollTop);
+     
+      
+      //sp.scrollTo({ top: idx * itemH - centerOffset, behavior: 'smooth' });
+      highlight(sp, idx);
+      alignMask(sp,idx);
+      document.getElementById("settings").style.display="none";
+
+
+      let debounce;
+      let isProgrammaticScroll = true;
+      setTimeout(() => { isProgrammaticScroll = false; }, 1000);
+
+      sp.addEventListener('scroll', () => {
+        if(isProgrammaticScroll) return;
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          const centerOffset = (sp.clientHeight - itemH) / 2;
+          const idx = Math.round((sp.scrollTop + centerOffset) / itemH);
+          
+          sp.scrollTo({ top: idx * itemH - centerOffset, behavior: 'smooth' });
+          highlight(sp, idx);
+          alignMask(sp,idx);
+        }, 100);
+      });
     }, 0);
 
     // 停滚后自动对齐并高亮
-    let debounce;
-    sp.addEventListener('scroll', () => {
-      clearTimeout(debounce);
-      debounce = setTimeout(() => {
-        const centerOffset = (sp.clientHeight - itemH) / 2;
-        const idx = Math.round((sp.scrollTop + centerOffset) / itemH);
-        sp.scrollTo({ top: idx * itemH - centerOffset, behavior: 'smooth' });
-        highlight(sp, idx);
-        alignMask(sp,idx);
-      }, 100);
-    });
+    
+    
   });
+}
+
 
   function highlight(spinner, idx) {
+    
     spinner.querySelectorAll('.spinner-item').forEach((it, i) => {
+      
       it.classList.toggle('selected', i === idx);
     });
   }
+  init_time();
 
   // 方向切换
 

@@ -176,6 +176,13 @@ def get_router(appServer:"AppServer") -> APIRouter:
         print(days,hours,minutes)
         return {"status":"success"}
 
+    @router.post("/get_time")
+    async def get_time(request: Request):
+        days=appServer.config["image_selector_interval"]["days"]
+        hours=appServer.config["image_selector_interval"]["hours"]
+        minutes=appServer.config["image_selector_interval"]["minutes"]
+        return {"days":days,"hours":hours,"minutes":minutes}
+
 
     @router.post("/get_module_list")
     async def get_module_list(request: Request):
@@ -257,5 +264,8 @@ def get_router(appServer:"AppServer") -> APIRouter:
             config["resize_image_size"]=resize_image_size
         return {"status":"success"}
    
+    @router.post("/get_size")
+    async def get_size(request: Request):
+        return {"height":appServer.config["resize_image_size"][0],"weight":appServer.config["resize_image_size"][1],"offset_h":appServer.config["resize_offset"][0],"offset_w":appServer.config["resize_offset"][1]}
 
     return router

@@ -12,7 +12,32 @@ box.setAttribute('data-y', 40);
 function updateChip(w, h){
     chip.textContent = Math.round(w) + '×' + Math.round(h);
 }
-updateChip(box.clientWidth, box.clientHeight);
+
+async function getSize(){
+    const res=await fetch('/api/get_size', {
+        method: 'POST',
+    });
+    if(res.ok){
+        const data=await res.json();
+        box.style.width = data.height+'px';
+        box.style.height = data.weight+'px';
+        updateChip(data.height, data.weight);
+
+        const max_height=480;
+        const max_weight=800;
+        const x = data.offset_h;
+        const y = max_weight-data.weight-data.offset_w;
+        console.log(x,y);
+
+        box.style.transform = `translate(${x}px, ${y}px)`;
+        box.setAttribute('data-x', x);
+        box.setAttribute('data-y', y);
+    }
+    else{
+        updateChip(box.clientWidth, box.clientHeight);
+    }
+}
+getSize();
 
 // 可拖拽
 const dragModifiers = [
@@ -65,7 +90,10 @@ function currentResizeModifiers(){
 }
 
 // 可缩放
-function setupResizable(){
+async function setupResizable(){
+    
+    
+    
     interact('#box').resizable({
     edges: {
         // 让边和角的手柄都能触发缩放
