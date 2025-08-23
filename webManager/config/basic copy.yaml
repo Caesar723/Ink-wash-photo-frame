@@ -6,6 +6,14 @@ basic_image_path: "webManager/static/images/shored_img"
 basic_frame_path: "webManager/static/images/image_frame"
 basic_font_path: "webManager/static/font"
 target_img_size: [800, 480]
+resize_image_size:
+- 480
+- 800
+resize_offset:
+- 0
+- 0
+
+
 
 chat_base_url: "https://www.dmxapi.com/v1"
 chat_api_token: "sk-SWLjAPztaxyu5dQnfhT2EyxFD4idjsqWVHUZ5MESTIGRVuis"

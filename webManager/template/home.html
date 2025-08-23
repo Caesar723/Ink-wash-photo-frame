@@ -18,6 +18,10 @@
   <link href="static/css/filepond-plugin-image-preview.min.css" rel="stylesheet" />
   <link href="static/css/setting.css" rel="stylesheet" />
   <link href="static/css/home.css" rel="stylesheet" />
+
+
+  <script src="static/js/interact.js"></script>
+
 </head>
 <body>
   <div class="console">
@@ -161,6 +165,40 @@
             </button>
           </form>
           </div>
+
+          <!-- <div class="container"> -->
+            <div class="container" role="region" aria-label="可缩放方框组件">
+              <h1>设置屏幕大小 <span class="badge">480×800 屏幕</span></h1>
+              <p class="hint">拖住方框移动；拖手柄缩放。已限制在画布内，最小尺寸 80×60。</p>
+          
+              <div class="stage" id="stage">
+                <div class="box resize-drag" id="box" tabindex="0" aria-label="可缩放方框">
+                  <span class="size-chip" id="sizeChip">320×180</span>
+          
+                  <!-- 八个缩放手柄（必须是子元素，供 Interact.js 选择器命中） -->
+                  <span class="handle nw"></span>
+                  <span class="handle ne"></span>
+                  <span class="handle sw"></span>
+                  <span class="handle se"></span>
+                  <span class="handle n"></span>
+                  <span class="handle s"></span>
+                  <span class="handle w"></span>
+                  <span class="handle e"></span>
+                </div>
+              </div>
+          
+              <div class="toolbar">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button class="btn" id="resetBtn">重置</button>
+                  <button class="btn" id="setBtn">设置</button>
+                  
+                </div>
+                
+              </div>
+            </div>
+
+
+          <!-- </div> -->
         </div>
       </main>
     </div>
@@ -206,6 +244,7 @@
   <script src="static/js/advance_setting.js"></script>
   <script src="static/js/image_gallary.js"></script>
   <script type="module" src="static/js/citySelect.js"></script>
+  <script src="static/js/resize.js"></script>
   
   <script>
     // 导航切换

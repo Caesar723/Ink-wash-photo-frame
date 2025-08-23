@@ -141,10 +141,13 @@ def get_router(appServer:"AppServer") -> APIRouter:
         mode=data["mode"]
         print(mode)
 
+        current_size_1=appServer.config["target_img_size"][0]
+        current_size_2=appServer.config["target_img_size"][1]
+
         if mode=="horizontal":
-            appServer.config["target_img_size"]= [480, 800]
+            appServer.config["target_img_size"]= [min(current_size_1,current_size_2),max(current_size_1,current_size_2)]
         elif mode=="vertical":
-            appServer.config["target_img_size"]=[800,480]
+            appServer.config["target_img_size"]=[max(current_size_1,current_size_2),min(current_size_1,current_size_2)]
         
         
         return {"status":"success"}
@@ -237,7 +240,22 @@ def get_router(appServer:"AppServer") -> APIRouter:
 
 
        
-
+    @router.post("/set_size")
+    async def set_size(request: Request):
+        data=await request.json()
+        if appServer.config["target_img_size"][0]>appServer.config["target_img_size"][1]:
+            target_img_size=[data["weight"],data["height"]]
+        else:
+            target_img_size=[data["height"],data["weight"]]
+        
+        
+        resize_offset=[data["offset_h"],data["offset_w"]]
+        resize_image_size=[data["height"],data["weight"]]
+        async with appServer.config as config:
+            config["target_img_size"]=target_img_size
+            config["resize_offset"]=resize_offset
+            config["resize_image_size"]=resize_image_size
+        return {"status":"success"}
    
 
     return router

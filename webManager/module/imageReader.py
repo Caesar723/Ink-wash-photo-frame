@@ -27,15 +27,22 @@ class ImageReader(BaseImageCreator):
         
         return image
 
-    def image_final_process(self,image):
-        saturation_factor = 2  # 提高饱和度 50%
-        enhancer = ImageEnhance.Color(image)
-        image = enhancer.enhance(saturation_factor)
-        if self.config["target_img_size"][0]==800:
+    def image_rotate(self,image):
+        if self.config["target_img_size"][0]>self.config["target_img_size"][1]:
             image= image.rotate(-90, expand=True)
         else:
             image= image.rotate(180, expand=True)
         return image
+
+    # def image_final_process(self,image):
+    #     saturation_factor = 2  # 提高饱和度 50%
+    #     enhancer = ImageEnhance.Color(image)
+    #     image = enhancer.enhance(saturation_factor)
+    #     if self.config["target_img_size"][0]==800:
+    #         image= image.rotate(-90, expand=True)
+    #     else:
+    #         image= image.rotate(180, expand=True)
+    #     return image
 
 
     

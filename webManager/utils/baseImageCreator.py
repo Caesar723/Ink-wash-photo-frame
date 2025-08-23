@@ -7,6 +7,7 @@ from io import BytesIO
 import httpx
 import asyncio
 from datetime import datetime
+import numpy as np
 
 
 from webManager.utils.baseHookManager import BaseHookManager
@@ -81,7 +82,7 @@ class BaseImageCreator(BaseHookManager):
 
     def image_preprocess(self,image):
         #image.show()
-        print(image.size)
+        
         # 原始尺寸
         original_width, original_height = image.size
         target_width, target_height = self.config["target_img_size"][1],self.config["target_img_size"][0]
@@ -99,7 +100,7 @@ class BaseImageCreator(BaseHookManager):
         padding = (delta_w // 2, delta_h // 2, delta_w - delta_w // 2, delta_h - delta_h // 2)
 
         # 扩张到目标大小
-        print(resized_img.mode)
+        
         image = ImageOps.expand(resized_img, padding, fill=(0, 0, 0))
         return image
 
@@ -135,16 +136,40 @@ class BaseImageCreator(BaseHookManager):
         #image.show()
         return image
 
+    def image_rotate(self,image):
+        if self.config["target_img_size"][0]>self.config["target_img_size"][1]:
+            
+            image= image.rotate(-90, expand=True)
+        else:
+            
+            image= image.rotate(180, expand=True)
+        return image
+
     def image_final_process(self,image):
         saturation_factor = 2  # 提高饱和度 50%
         enhancer = ImageEnhance.Color(image)
         image = enhancer.enhance(saturation_factor)
         
-        if self.config["target_img_size"][0]==800:
-            image= image.rotate(-90, expand=True)
-        else:
-            image= image.rotate(180, expand=True)
+        
+        image=self.image_rotate(image)
+        
+        #(800,480)
+        image=self.image_resize(image)
+        
         return image
+
+    def image_resize(self,image):
+        
+        background=np.zeros((480,800,3), dtype=np.uint8)
+        idx_x=self.config["resize_offset"][0]
+        idx_x_end=idx_x+self.config["resize_image_size"][0]
+        idx_y=self.config["resize_offset"][1]
+        idx_y_end=idx_y+self.config["resize_image_size"][1]
+        
+        background[idx_x:idx_x_end,idx_y:idx_y_end]=image
+        background=Image.fromarray(background)
+        
+        return background
 
 
 
