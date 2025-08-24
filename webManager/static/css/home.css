@@ -197,8 +197,9 @@
   /* 画布：固定 800×480 */
   .stage{
     position: relative;
-    width: 480px;
-    height: 800px;
+    width: 90%;
+    aspect-ratio: 480 / 800; /* 维持 480:800 的比例 */
+    /* height: 800px; */
     margin-inline:auto;
     border-radius: 16px;
     background:
