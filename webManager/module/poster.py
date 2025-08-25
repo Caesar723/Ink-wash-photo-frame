@@ -128,7 +128,6 @@ class Poster(BaseImageCreator):
         }
         url = f"{base_url}?{urlencode(params)}"
         image=await self.url_to_image(url)
-        image.show()
         return image
 
     def get_font_path(self):
@@ -145,5 +144,5 @@ class Poster(BaseImageCreator):
 
 if __name__ == "__main__":
     #print(ChatApi(config=read_yaml("webManager/config/basic.yaml")).get_font_path())
-    asyncio.run(ChatApi(config=read_yaml("webManager/config/basic.yaml")).create_image())
+    asyncio.run(Poster(config=read_yaml("webManager/config/basic.yaml")).create_image())
     
