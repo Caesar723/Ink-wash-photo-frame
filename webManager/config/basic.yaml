@@ -1,40 +1,59 @@
-basic_font_path: webManager/static/font
-basic_frame_path: webManager/static/images/image_frame
-basic_image_path: webManager/static/images/shored_img
+basic_store_path: "webManager/static/images/shored_img"
 basic_port: 23433
-basic_store_path: webManager/static/images/shored_img
-chat_api_token: sk-SWLjAPztaxyu5dQnfhT2EyxFD4idjsqWVHUZ5MESTIGRVuis
-chat_base_url: https://www.dmxapi.com/v1
-chat_model: Doubao-1.5-pro-32k
-image_selector_interval:
-  days: 0
-  hours: 0
-  minutes: 5
-module_dict:
-  "AI\u4F5C\u8BCD": webManager.module.chatApi.ChatApi
-  "\u4E09\u5408\u4E00": webManager.module.threeCombineOne.ThreeCombineOne
-  "\u5929\u6C14\u9884\u62A5": webManager.module.whetherReport.BaseWhetherReport
-  "\u666E\u901A\u5C55\u793A_\u586B\u5145": webManager.module.imageReader.ImageReader
-  "\u666E\u901A\u5C55\u793A_\u88C1\u526A": webManager.module.imageReaderCrop.ImageReaderCrop
-  "\u7B80\u5355\u5929\u6C14": webManager.module.simpleWhetherReport.SimpleWhetherReport
-module_used:
-- "AI\u4F5C\u8BCD"
-- "\u666E\u901A\u5C55\u793A_\u88C1\u526A"
-pre_content: "\u5E73\u51E1\u65E5\u5B50\u4F3C\u6F7A\u6F7A\u6EAA\u6D41\uFF0C\u6CA1\u6709\
-  \u60CA\u6D9B\u9A87\u6D6A\uFF0C\u5374\u4E5F\u4E00\u8DEF\u6B22\u6B4C\u3002\u4F1A\u4E3A\
-  \u7410\u4E8B\u6101\u7709\uFF0C\u4E3A\u79BB\u522B\u5FC3\u4F24\u3002\u53EF\u5C31\u5728\
-  \u8FD9\u666E\u901A\u65E5\u5E38\u91CC\uFF0C\u85CF\u7740\u5BB6\u4EBA\u7684\u7B11\u3001\
-  \u670B\u53CB\u7684\u6696\u3002\u522B\u5ACC\u5F03\u5B83\u5E73\u6DE1\uFF0C\u8FD9\u7EC6\
-  \u6C34\u957F\u6D41\uFF0C\u672C\u5C31\u662F\u4EBA\u751F\u6700\u96BE\u5F97\u7684\u9988\
-  \u8D60\u3002 "
+
+
+basic_image_path: "webManager/static/images/shored_img"
+basic_frame_path: "webManager/static/images/image_frame"
+basic_font_path: "webManager/static/font"
+target_img_size: [800, 480]
 resize_image_size:
 - 480
 - 800
 resize_offset:
 - 0
 - 0
-target_img_size:
-- 800
-- 480
-whether_api_token: f077afc158a17acaef193a6f67b0f5d3
-whether_city: Shanghai,cn
+
+
+
+chat_base_url: "https://www.dmxapi.com/v1"
+chat_api_token: "sk-SWLjAPztaxyu5dQnfhT2EyxFD4idjsqWVHUZ5MESTIGRVuis"
+chat_model: "Doubao-1.5-pro-32k"
+
+
+pre_content: |
+  你也许正在经历一些看不到尽头的时刻，像是站在夜里、海雾之中，看不到彼岸。
+  但请记住——每一段逆流而上的日子，都是为了积蓄未来乘风破浪的力量。
+
+  哪怕此刻的你很小、很普通、甚至有点迷失，
+  也无妨。人生真正的光芒，往往来自最暗的深海里慢慢发亮。
+
+  你不是沉没，而是在酝酿属于你的风帆。
+
+
+
+whether_api_token: "f077afc158a17acaef193a6f67b0f5d3"
+whether_city: "Shanghai,cn"
+
+
+module_dict:
+  天气预报: "webManager.module.whetherReport.BaseWhetherReport"
+  简单天气: "webManager.module.simpleWhetherReport.SimpleWhetherReport"
+  普通展示_填充: "webManager.module.imageReader.ImageReader"
+  普通展示_裁剪: "webManager.module.imageReaderCrop.ImageReaderCrop"
+  AI作词: "webManager.module.chatApi.ChatApi"
+  三合一: "webManager.module.threeCombineOne.ThreeCombineOne"
+  海报: "webManager.module.poster.Poster"
+
+module_used:
+  - "AI作词"
+  - "普通展示_填充"
+  - "普通展示_裁剪"
+  - "天气预报"
+  - "简单天气"
+  - "三合一"
+
+
+image_selector_interval:
+  minutes: 5
+  hours: 0
+  days: 0

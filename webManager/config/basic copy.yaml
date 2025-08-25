@@ -42,7 +42,7 @@ module_dict:
   普通展示_裁剪: "webManager.module.imageReaderCrop.ImageReaderCrop"
   AI作词: "webManager.module.chatApi.ChatApi"
   三合一: "webManager.module.threeCombineOne.ThreeCombineOne"
-
+  海报: "webManager.module.poster.Poster"
 
 module_used:
   - "AI作词"

@@ -14,7 +14,7 @@ if __name__ == "__main__":
 from webManager.utils.helper import read_yaml
 from webManager.utils.baseImageCreator import BaseImageCreator
 
-class ChatApi(BaseImageCreator):
+class Poster(BaseImageCreator):
     def __init__(self,config):
         super().__init__(config)
 
