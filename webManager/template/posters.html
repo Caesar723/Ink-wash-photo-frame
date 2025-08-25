@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>poster</title>
+  <style>
+    /* 全局基础样式 */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    body { overflow: hidden; }
+    .poster {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      color: #fff;
+    }
+    .poster .bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+    /* 通用文字容器，具体布局在各个 layout 中覆写 */
+    .poster .content {
+      position: absolute;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(0.5rem, 1vh, 1.5rem);
+      line-height: 1.4;
+    }
+    .eyebrow {
+      font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+      letter-spacing: 0.05em;
+      opacity: 0.85;
+    }
+    .title {
+      font-weight: bold;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      line-height: 1.2;
+    }
+    .description {
+      font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+      max-width: 60ch;
+      opacity: 0.9;
+    }
+    .signature {
+      font-size: clamp(0.8rem, 1.2vw, 1rem);
+      align-self: flex-end;
+      opacity: 0.75;
+    }
+    /* 隐藏所有布局，JS 根据 index 显示 */
+    .poster { display: none; }
+
+    /* 通用遮罩层，可在各布局中调整不透明度或颜色 */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 1;
+    }
+
+    /* ========= 布局样式 ========= */
+    /* layout0：左下角排版，右下角落款 */
+    .layout0 .content {
+      bottom: clamp(2rem, 6vh, 5rem);
+      left: clamp(2rem, 5vw, 5rem);
+      max-width: 60%;
+    }
+    .layout0 .signature { position: absolute; bottom: clamp(1.5rem, 4vh, 3rem); right: clamp(2rem, 5vw, 5rem); }
+
+    /* layout1：居中排版，落款底部居中 */
+    .layout1 .content {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      align-items: center;
+      text-align: center;
+    }
+    .layout1 .signature { position: absolute; bottom: clamp(1.5rem, 4vh, 3rem); left: 50%; transform: translateX(-50%); }
+
+    /* layout2：右上角排版，落款左下角 */
+    .layout2 .content {
+      top: clamp(2rem, 6vh, 5rem);
+      right: clamp(2rem, 5vw, 5rem);
+      align-items: flex-end;
+      text-align: right;
+    }
+    .layout2 .signature { position: absolute; bottom: clamp(1.5rem, 4vh, 3rem); left: clamp(2rem, 5vw, 5rem); }
+
+    /* layout3：上下分层，图片上半，文字下半纯色背景 */
+    .layout3 .bg {
+      height: 60%;
+    }
+    .layout3 .lower {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 40%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(1.5rem, 5vw, 3rem);
+    }
+    .layout3 .content {
+      position: relative;
+    }
+    .layout3 .signature { align-self: flex-end; margin-top: auto; }
+
+    /* layout4：对角线排版 */
+    .layout4 .content {
+      /* 斜角排版调整：将文本稍微向右和下偏移，减少旋转角度，扩展宽度以避免截断 */
+      top: 15%;
+      left: 5%;
+      width: 120%;
+      transform: rotate(-6deg);
+    }
+    .layout4 .title {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      line-height: 1.1;
+    }
+    .layout4 .description { max-width: 50vw; }
+    .layout4 .signature {
+      position: absolute;
+      bottom: clamp(2rem, 5vh, 4rem);
+      right: clamp(2rem, 5vw, 5rem);
+      transform: rotate(-6deg);
+    }
+
+    /* layout5：垂直书写排版 */
+    .layout5 .content {
+      top: 50%;
+      left: clamp(2rem, 5vw, 4rem);
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      gap: 1rem;
+    }
+    .layout5 .content .title { writing-mode: vertical-rl; }
+    .layout5 .content .description { max-width: unset; width: auto; }
+    .layout5 .signature { position: absolute; bottom: clamp(1.5rem, 4vh, 3rem); right: clamp(2rem, 5vw, 5rem); }
+
+    /* layout6：全屏居中，带色块遮罩 */
+    .layout6 .overlay { background: rgba(0,0,0,0.5); }
+    .layout6 .content {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      align-items: center;
+      text-align: center;
+      backdrop-filter: blur(2px);
+      padding: clamp(1rem, 3vw, 2rem);
+      background: rgba(255,255,255,0.1);
+      border-radius: 1rem;
+    }
+    .layout6 .signature { margin-top: 1rem; align-self: center; }
+
+    /* layout7：圆形图片裁剪，文字外围 */
+    .layout7 .bg {
+      clip-path: circle(65% at 50% 40%);
+    }
+    .layout7 .overlay { background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 80%); }
+    .layout7 .content {
+      bottom: clamp(2rem, 6vh, 5rem);
+      left: clamp(2rem, 5vw, 5rem);
+    }
+    .layout7 .description { max-width: 40vw; }
+    .layout7 .signature { position: absolute; top: clamp(1.5rem, 4vh, 3rem); right: clamp(2rem, 5vw, 5rem); }
+
+    /* layout8：左侧竖排大字，右侧正文 */
+    .layout8 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .layout8 .bg { grid-column: 1 / -1; grid-row: 1 / -1; filter: brightness(0.6); }
+    .layout8 .left-col {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: clamp(2rem, 8vw, 5rem);
+      font-weight: bold;
+      opacity: 0.7;
+    }
+    .layout8 .right-col {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: clamp(2rem, 5vw, 4rem);
+      gap: clamp(1rem, 3vh, 2rem);
+    }
+    .layout8 .signature { margin-top: auto; align-self: flex-end; }
+
+    /* layout9：重叠卡片效果 */
+    .layout9 .overlay { background: rgba(0,0,0,0.55); }
+    .layout9 .card {
+      position: absolute;
+      z-index: 2;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 1rem;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      width: 60%;
+      top: 50%;
+      left: 10%;
+      transform: translateY(-50%) rotate(-3deg);
+    }
+    .layout9 .card:nth-of-type(2) {
+      top: 53%; left: 20%; transform: translateY(-50%) rotate(2deg);
+    }
+
+    .layout9 .card .signature { margin-top: 1rem; text-align: right; }
+
+    /* layout10：径向渐变遮罩，底部中心文字 */
+    .layout10 .overlay { background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 80%); }
+    .layout10 .content {
+      bottom: clamp(3rem, 8vh, 6rem);
+      left: 50%;
+      transform: translateX(-50%);
+      align-items: center;
+      text-align: center;
+    }
+    .layout10 .signature { margin-top: 1rem; }
+
+    /* layout11：暗黑主题，左上排版 */
+    .layout11 .bg { filter: brightness(0.4); }
+    .layout11 .content {
+      top: clamp(2rem, 6vh, 5rem);
+      left: clamp(2rem, 5vw, 5rem);
+    }
+    .layout11 .title { color: #f5f5f5; }
+    .layout11 .description { color: #dcdcdc; }
+    .layout11 .signature { position: absolute; bottom: clamp(2rem, 5vh, 4rem); right: clamp(2rem, 5vw, 5rem); opacity: 0.7; }
+
+    /* layout12：柔和粉彩主题，上中排版 */
+    .layout12 .overlay { background: rgba(255, 240, 245, 0.5); }
+    .layout12 .content {
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -30%);
+      align-items: center;
+      text-align: center;
+      color: #333;
+    }
+    .layout12 .title { color: #222; }
+    .layout12 .description { color: #444; }
+    .layout12 .signature { color: #666; top: unset; bottom: clamp(2rem, 5vh, 4rem); left: 50%; transform: translateX(-50%); }
+
+    /* layout13：带边框的内嵌排版 */
+    .layout13 .frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      border: 2px solid rgba(255,255,255,0.8);
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+    }
+    .layout13 .frame .image-area { flex: 1; background-size: cover; background-position: center; }
+    .layout13 .frame .text-area {
+      flex: 1;
+      background: rgba(0,0,0,0.6);
+      padding: clamp(1.5rem, 4vw, 3rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .layout13 .text-area .signature { margin-top: auto; }
+
+    /* layout14：左右双色分割排版 */
+    .layout14 {
+      display: flex;
+    }
+    .layout14 .split {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+    .layout14 .left {
+      width: 40%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      padding: clamp(2rem, 5vw, 4rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: clamp(1rem, 2vh, 2rem);
+    }
+    .layout14 .left .signature {
+      margin-top: auto;
+    }
+    .layout14 .right {
+      flex: 1;
+    }
+
+    /* layout15：垂直条纹排版 */
+    .layout15 {
+      position: relative;
+    }
+    .layout15 .bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+    .layout15 .bar.left {
+      left: 0;
+      width: 20%;
+      background: rgba(0, 0, 0, 0.6);
+    }
+    .layout15 .bar.right {
+      right: 0;
+      width: 15%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .layout15 .overlay { background: rgba(0,0,0,0.3); z-index: 1; }
+    .layout15 .content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      max-width: 70%;
+      z-index: 2;
+    }
+
+    /* layout16：三角裁剪排版 */
+    .layout16 .bg {
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+    .layout16 .overlay { background: linear-gradient(to bottom right, rgba(0,0,0,0.3), rgba(0,0,0,0.8)); }
+    .layout16 .content {
+      top: 60%;
+      left: 60%;
+      transform: translate(-50%, -50%);
+      max-width: 40%;
+    }
+    .layout16 .signature {
+      position: absolute;
+      bottom: clamp(2rem, 5vh, 4rem);
+      right: clamp(2rem, 5vw, 5rem);
+      z-index: 2;
+    }
+
+    /* layout17：中心横幅排版
+       重新设计为位于页面中央的半透明横幅，内含文字和签名，适配各种屏幕 */
+    .layout17 {
+      position: relative;
+    }
+    .layout17 .band {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      padding: clamp(1.5rem, 5vw, 3rem);
+      border-radius: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(0.5rem, 2vh, 1rem);
+      /* 放在覆盖层之上，使其可见 */
+      z-index: 2;
+    }
+    .layout17 .band .content {
+      position: static;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: clamp(0.5rem, 2vh, 1rem);
+    }
+    .layout17 .band .description {
+      max-width: 60ch;
+    }
+    .layout17 .band .signature {
+      margin-top: 1rem;
+      align-self: flex-end;
+    }
+
+    /* layout18：模糊面板排版 */
+    .layout18 .panel {
+      position: absolute;
+      bottom: clamp(2rem, 8vh, 6rem);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      padding: clamp(2rem, 6vw, 4rem);
+      border-radius: 1rem;
+      max-width: 80%;
+    }
+    .layout18 .panel .signature { margin-top: 1rem; text-align: right; }
+
+    /* layout19：浮动卡片排版 */
+    .layout19 .card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 1rem;
+      padding: clamp(2rem, 5vw, 4rem);
+      width: 70%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .layout19 .card .content { position: static; }
+    .layout19 .card .signature { margin-top: 1rem; text-align: right; }
+  </style>
+</head>
+<body>
+  <!-- layout0 -->
+  <section class="poster layout0">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout1 -->
+  <section class="poster layout1">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout2 -->
+  <section class="poster layout2">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout3 -->
+  <section class="poster layout3">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="lower">
+      <div class="content">
+        <div class="eyebrow"></div>
+        <div class="title"></div>
+        <div class="description"></div>
+        <div class="signature"></div>
+      </div>
+    </div>
+  </section>
+  <!-- layout4 -->
+  <section class="poster layout4">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout5 -->
+  <section class="poster layout5">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout6 -->
+  <section class="poster layout6">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout7 -->
+  <section class="poster layout7">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout8 -->
+  <section class="poster layout8">
+    <div class="bg"></div>
+    <div class="left-col"></div>
+    <div class="right-col">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout9 -->
+  <section class="poster layout9">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="card">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout10 -->
+  <section class="poster layout10">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout11 -->
+  <section class="poster layout11">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout12 -->
+  <section class="poster layout12">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout13 -->
+  <section class="poster layout13">
+      <div class="bg" style="filter: blur(4px);"></div>
+    <div class="overlay"></div>
+    <div class="frame">
+      <div class="image-area"></div>
+      <div class="text-area">
+        <div class="eyebrow"></div>
+        <div class="title"></div>
+        <div class="description"></div>
+        <div class="signature"></div>
+      </div>
+    </div>
+  </section>
+  <!-- layout14 -->
+  <section class="poster layout14">
+    <!-- 使用背景图作为整体背景 -->
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="split">
+      <div class="left">
+        <div class="eyebrow"></div>
+        <div class="title"></div>
+        <div class="description"></div>
+        <div class="signature"></div>
+      </div>
+      <div class="right"></div>
+    </div>
+  </section>
+  <!-- layout15 -->
+  <section class="poster layout15">
+    <div class="bg"></div>
+    <!-- 垂直色块装饰条 -->
+    <div class="bar left"></div>
+    <div class="bar right"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout16 -->
+  <section class="poster layout16">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+    </div>
+    <div class="signature"></div>
+  </section>
+  <!-- layout17 -->
+  <section class="poster layout17">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="band">
+      <div class="content">
+        <div class="eyebrow"></div>
+        <div class="title"></div>
+        <div class="description"></div>
+      </div>
+      <!-- 将签名放入横幅内部，避免分离导致布局异常 -->
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout18 -->
+  <section class="poster layout18">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="panel">
+      <div class="eyebrow"></div>
+      <div class="title"></div>
+      <div class="description"></div>
+      <div class="signature"></div>
+    </div>
+  </section>
+  <!-- layout19 -->
+  <section class="poster layout19">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="card">
+      <div class="content">
+        <div class="eyebrow"></div>
+        <div class="title"></div>
+        <div class="description"></div>
+        <div class="signature"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // 文案变量
+    function getQueryParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
+    const eyebrowText = getQueryParam('eyebrow') || '一张图的故事';
+    const titleText   = getQueryParam('title') || '在光里，遇见风';
+    const descText    = getQueryParam('desc') || '把一句主张留给标题，把余温交给留白。让画面先说话，再让文字轻轻补全。';
+    const sigText     = getQueryParam('signature') || '—— 2025 · 夏';
+
+    // 单一的默认背景图链接：所有布局默认显示这一张图片。
+    // 你可以在这里修改默认图，也可以在 URL 参数中通过 ?img=YOUR_URL 为某个布局指定其他图片。
+    const defaultImg = getQueryParam('img_path') || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80';
+
+    // 动态选择需要展示的排版索引（0～19）。
+    // 默认显示 0，但如果 URL 带有 index 参数，则使用该值。
+    // 支持从 hash(#index=) 和查询串(?index=) 中读取。
+    let index = getQueryParam('index') || 0;
+    // 先尝试解析哈希（去掉开头的#），否则解析查询字符串
+    const paramString = window.location.hash
+      ? window.location.hash.substring(1)
+      : window.location.search.substring(1);
+    const params = new URLSearchParams(paramString);
+    const idxParam = params.get('index');
+    if (idxParam !== null && !isNaN(parseInt(idxParam))) {
+      index = Math.max(0, Math.min(19, parseInt(idxParam)));
+    }
+
+    // 解析 img 参数（如果存在），仅在当前 index 对应的布局上生效
+    const imgParam = params.get('img');
+    const customImg = imgParam ? decodeURIComponent(imgParam) : null;
+
+    // 获取所有版面
+    const posters = document.querySelectorAll('.poster');
+    posters.forEach((p, i) => {
+      // 计算当前布局的背景图：若为当前索引且用户传入了 img，则使用 customImg；否则使用默认图。
+      const bgUrl = (i === index && customImg) ? customImg : defaultImg;
+      const bg = p.querySelector('.bg');
+      if (bg) {
+        bg.style.backgroundImage = `url('${bgUrl}')`;
+      }
+      // 布局13需要内嵌图片区域
+      if (p.classList.contains('layout13')) {
+        const imgArea = p.querySelector('.image-area');
+        if (imgArea) {
+          imgArea.style.backgroundImage = `url('${bgUrl}')`;
+        }
+      }
+      // 控制显示当前版面，其余隐藏
+      if (i === index) {
+        p.style.display = 'block';
+        // 填充文本内容
+        p.querySelectorAll('.eyebrow').forEach(el => el.textContent = eyebrowText);
+        p.querySelectorAll('.title').forEach(el => el.textContent = titleText);
+        p.querySelectorAll('.description').forEach(el => el.textContent = descText);
+        p.querySelectorAll('.signature').forEach(el => el.textContent = sigText);
+        // 布局8左侧竖排
+        if (p.classList.contains('layout8')) {
+          const leftCol = p.querySelector('.left-col');
+          if (leftCol) {
+            leftCol.textContent = titleText;
+          }
+        }
+      } else {
+        p.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

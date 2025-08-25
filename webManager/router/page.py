@@ -70,6 +70,15 @@ def get_router(appServer:"AppServer") -> APIRouter:
             }
         )
 
+    @router.get("/poster")
+    async def poster(request: Request):
+        return appServer.templates.TemplateResponse(
+            "posters.html", 
+            {
+            "request": request,
+            }
+        )
+
 
     @router.get("/")
     async def index(request: Request):
