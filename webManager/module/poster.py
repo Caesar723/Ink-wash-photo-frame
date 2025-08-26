@@ -116,10 +116,12 @@ class Poster(BaseImageCreator):
         content=await self.get_chat_response()
         data=self.get_content(content)
         img_path=self.get_image_path(self.config["basic_store_path"])
-        
+
+        image=Image.open(os.path.join(self.config["basic_image_path"],img_path))
+        areas=self.get_fit_area(image)
         
         params = {
-            "index":random.randint(0,19),
+            "index":random.choice(list(areas)),
             "eyebrow": data["Eyebrow"],
             "title": data["Title"],
             "desc": data["Description"],
@@ -143,6 +145,13 @@ class Poster(BaseImageCreator):
 
 
 if __name__ == "__main__":
-    #print(ChatApi(config=read_yaml("webManager/config/basic.yaml")).get_font_path())
-    asyncio.run(Poster(config=read_yaml("webManager/config/basic.yaml")).create_image())
-    
+    import cv2
+    import numpy as np
+    async def main():
+        
+        poster=Poster(config=read_yaml("webManager/config/basic.yaml"))
+        
+        image=await poster.create_image()
+        image.show()
+        
+    asyncio.run(main())

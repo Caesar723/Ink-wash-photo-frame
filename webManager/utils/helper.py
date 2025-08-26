@@ -3,6 +3,9 @@ import yaml
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import anyio
+import cv2
+import numpy as np
+
 
 executor = ThreadPoolExecutor(max_workers=5)
 
@@ -122,3 +125,94 @@ def get_class_by_name(class_name):
     package = importlib.import_module( ".".join(path[:-1]) ) 
     class_handler = getattr(package, path[-1]) 
     return class_handler 
+
+
+
+def region_metrics(img):
+    # 轻量化：先把图像宽边缩到 640（树莓派可改小到 320）
+    h, w = img.shape[:2]
+    scale = 640.0 / max(h, w)
+    if scale < 1.0:
+        img = cv2.resize(img, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_AREA)
+    h, w = img.shape[:2]
+
+    # 划分 5 块：左上、右上、左下、右下、中间
+    cx, cy = w // 2, h // 2
+    # 中间区域取宽高的 1/3，可按需调整
+    cw, ch = w // 3, h // 3
+    mx1, my1 = cx - cw // 2, cy - ch // 2
+    mx2, my2 = mx1 + cw, my1 + ch
+
+    regions = {
+        "left_top":     (0,      0,      cx,     cy),
+        "right_top":    (cx,     0,      w,      cy),
+        "left_bottom":  (0,      cy,     cx,     h),
+        "right_bottom": (cx,     cy,     w,      h),
+        "center":       (mx1,    my1,    mx2,    my2),
+    }
+
+    results = {}
+
+    # 预备：转 HSV 和灰度（后面重复使用）
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    for name, (x1, y1, x2, y2) in regions.items():
+        roi_bgr  = img[y1:y2, x1:x2]
+        roi_hsv  = hsv[y1:y2, x1:x2]
+        roi_gray = gray[y1:y2, x1:x2]
+
+        # 1) 颜色方差（在 HSV 上更稳健）
+        #    使用 H、S、V 三通道的标准差，再取均值作为色彩变化量
+        h_std = float(roi_hsv[:, :, 0].std())
+        s_std = float(roi_hsv[:, :, 1].std())
+        v_std = float(roi_hsv[:, :, 2].std())
+        color_var = (h_std + s_std + v_std) / 3.0
+
+        # 2) 亮度熵（灰度直方图 16 bins，轻量）
+        hist = cv2.calcHist([roi_gray], [0], None, [16], [0, 256]).flatten()
+        p = hist / (hist.sum() + 1e-8)
+        entropy = float(-np.sum(p * np.log2(p + 1e-12)))
+
+        # 3) 边缘密度（Canny）
+        edges = cv2.Canny(roi_gray, 80, 160, L2gradient=False)
+        edge_density = float(edges.mean()) / 255.0  # 0~1：白像素比例
+
+        # 4) 拉普拉斯方差（纹理强度）
+        lap = cv2.Laplacian(roi_gray, cv2.CV_32F)
+        lap_var = float(lap.var())
+
+        # 组合分数：
+        # 单调分：颜色方差低 + 熵低 + 边缘少 + 纹理弱
+        # 丰富分：颜色方差高 + 熵高 + 边缘多 + 纹理强
+        # 为避免数值量纲不一致，这里做一个简单的归一化/缩放权重（可按数据分布再调）
+        # 注意：这些权重是经验值，可按你的图像做微调
+        monotone_score = (
+            (1.0 / (color_var + 1e-6)) * 1.0 +
+            (1.0 / (entropy   + 1e-6)) * 1.0 +
+            (1.0 - edge_density)       * 1.0 +
+            (1.0 / (np.sqrt(lap_var + 1e-6))) * 1.0
+        )
+
+        rich_score = (
+            color_var   * 1.0 +
+            entropy     * 1.0 +
+            edge_density* 1.0 +
+            np.sqrt(lap_var + 1e-6) * 1.0
+        )
+
+        results[name] = dict(
+            box=(x1, y1, x2, y2),
+            color_std=color_var,
+            entropy=entropy,
+            edge_density=edge_density,
+            lap_var=lap_var,
+            monotone_score=monotone_score,
+            rich_score=rich_score,
+        )
+
+    # 找出最单调/最丰富的区域
+    sorted_results = [item[0] for item in sorted(results.items(), key=lambda kv: kv[1]["rich_score"])]
+
+
+    return results, sorted_results

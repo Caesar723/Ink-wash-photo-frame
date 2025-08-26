@@ -8,8 +8,10 @@ import httpx
 import asyncio
 from datetime import datetime
 import numpy as np
+import cv2
+import math
 
-
+from webManager.utils.helper import region_metrics
 from webManager.utils.baseHookManager import BaseHookManager
 
 class BaseImageCreator(BaseHookManager):
@@ -22,6 +24,13 @@ class BaseImageCreator(BaseHookManager):
             base_url=self.config["chat_base_url"],
             
         )
+        
+        self.face_cascade = cv2.CascadeClassifier(
+            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        )
+
+        self.profile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_profileface.xml")
+        
         
     async def get_chat_response(self,extra=None):
         
@@ -234,3 +243,102 @@ class BaseImageCreator(BaseHookManager):
 
 
 
+    def haar_detection(self,image):
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        
+        faces = self.face_cascade.detectMultiScale(
+            gray, 
+            scaleFactor=1.05, 
+            minNeighbors=36,
+            minSize=(30, 30),
+            
+        )
+
+        
+        faces=list(faces)
+        
+        # for (x, y, w, h) in faces:
+        #     cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        # cv2.imshow("faces", image)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
+        
+        return faces
+
+
+    def image_crop(self,image, mode: str = "center", upscale: bool = True):
+
+        target_height, target_width = self.config["target_img_size"]
+        original_width, original_height = image.size
+
+        # 为兼容 Pillow 新旧版本的 LANCZOS
+        Resampling = getattr(Image, "Resampling", Image)
+        resample = Resampling.LANCZOS
+
+        # 缩放比例：为覆盖目标，用 max（让短边也能到达目标）
+        scale = max(target_width / original_width, target_height / original_height)
+
+        if not upscale:
+            # 不允许放大时，最多保持 1.0；如果仍不足以覆盖，后续会报错或可选择改为填充
+            scale = min(1.0, scale)
+
+        new_w = max(1, int(math.ceil(original_width * scale)))
+        new_h = max(1, int(math.ceil(original_height * scale)))
+
+        resized = image.resize((new_w, new_h), resample=resample)
+
+        
+        if new_w < target_width or new_h < target_height:
+            return ImageOps.pad(image, (target_width, target_height), method=resample, color=(0,0,0), centering=(0.5,0.5))
+
+        # 计算裁剪起点（根据对齐方式）
+        def get_offsets(mode_str: str):
+            # 水平
+            if "left" in mode_str:
+                left = 0
+            elif "right" in mode_str:
+                left = new_w - target_width
+            else:  # center / top / bottom
+                left = (new_w - target_width) // 2
+
+            # 垂直
+            if "top" in mode_str:
+                top = 0
+            elif "bottom" in mode_str:
+                top = new_h - target_height
+            else:  # center / left / right
+                top = (new_h - target_height) // 2
+
+            # 边界保护
+            left = max(0, min(left, new_w - target_width))
+            top = max(0, min(top, new_h - target_height))
+            return left, top
+
+        left, top = get_offsets(mode.lower())
+        box = (left, top, left + target_width, top + target_height)
+        out = resized.crop(box)
+        print(out.size)
+        
+        return out
+
+    def get_area_index(self):
+        return {
+            "left_bottom":[0,3,5,7,8,10,14],
+            "right_bottom":[3,10,13,16],
+            "left_top":[3,4,5,9,11,12,14],
+            "right_top":[2,3,12,13],
+            "center":[1,3,5,6,9,12,15,17,18,19]
+        }
+
+    def get_fit_area(self,image):
+        image=self.image_crop(image)
+        image=cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        areas=region_metrics(image)[1]
+        #faces=self.haar_detection(image)
+        area_indexs=self.get_area_index()
+        print(areas)
+        first=set(area_indexs[areas[0]])
+        second=set(area_indexs[areas[1]])
+        result=first.union(second)
+        return result

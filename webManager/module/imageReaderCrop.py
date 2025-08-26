@@ -53,6 +53,8 @@ class ImageReaderCrop(BaseImageCreator):
         :param upscale: 是否允许放大（原图比目标小的时候）。不允许则可能无法覆盖目标尺寸。
         :return: PIL.Image（大小为 config['target_img_size']）
         """
+        image=self.image_crop(image, mode, upscale)
+        return image
         print(image.size)
         target_height, target_width = self.config["target_img_size"]
         original_width, original_height = image.size

@@ -148,7 +148,7 @@
     .layout5 .signature { position: absolute; bottom: clamp(1.5rem, 4vh, 3rem); right: clamp(2rem, 5vw, 5rem); }
 
     /* layout6：全屏居中，带色块遮罩 */
-    .layout6 .overlay { background: rgba(0,0,0,0.5); }
+    .layout6 .overlay { background: rgba(0, 0, 0, 0.305); }
     .layout6 .content {
       top: 50%;
       left: 50%;
@@ -166,7 +166,7 @@
     .layout7 .bg {
       clip-path: circle(65% at 50% 40%);
     }
-    .layout7 .overlay { background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.8) 80%); }
+    .layout7 .overlay { background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.3) 0%, rgba(0, 0, 0, 0.754) 80%); }
     .layout7 .content {
       bottom: clamp(2rem, 6vh, 5rem);
       left: clamp(2rem, 5vw, 5rem);
@@ -204,7 +204,7 @@
     .layout8 .signature { margin-top: auto; align-self: flex-end; }
 
     /* layout9：重叠卡片效果 */
-    .layout9 .overlay { background: rgba(0,0,0,0.55); }
+    .layout9 .overlay { background: rgba(0, 0, 0, 0.237); }
     .layout9 .card {
       position: absolute;
       z-index: 2;
@@ -236,7 +236,7 @@
     .layout10 .signature { margin-top: 1rem; }
 
     /* layout11：暗黑主题，左上排版 */
-    .layout11 .bg { filter: brightness(0.4); }
+    .layout11 .bg { filter: brightness(0.8); }
     .layout11 .content {
       top: clamp(2rem, 6vh, 5rem);
       left: clamp(2rem, 5vw, 5rem);
@@ -246,7 +246,7 @@
     .layout11 .signature { position: absolute; bottom: clamp(2rem, 5vh, 4rem); right: clamp(2rem, 5vw, 5rem); opacity: 0.7; }
 
     /* layout12：柔和粉彩主题，上中排版 */
-    .layout12 .overlay { background: rgba(255, 240, 245, 0.5); }
+    .layout12 .overlay { background: rgba(255, 240, 245, 0.186); }
     .layout12 .content {
       top: 30%;
       left: 50%;
@@ -688,7 +688,7 @@
     // 动态选择需要展示的排版索引（0～19）。
     // 默认显示 0，但如果 URL 带有 index 参数，则使用该值。
     // 支持从 hash(#index=) 和查询串(?index=) 中读取。
-    let index = getQueryParam('index') || 0;
+    let index = getQueryParam('index') || 19;
     // 先尝试解析哈希（去掉开头的#），否则解析查询字符串
     const paramString = window.location.hash
       ? window.location.hash.substring(1)
