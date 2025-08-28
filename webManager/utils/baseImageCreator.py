@@ -10,8 +10,9 @@ from datetime import datetime
 import numpy as np
 import cv2
 import math
+import mediapipe as mp
 
-from webManager.utils.helper import region_metrics
+from webManager.utils.helper import region_metrics,face_boxes_from_image,region_metrics_3x3
 from webManager.utils.baseHookManager import BaseHookManager
 
 class BaseImageCreator(BaseHookManager):
@@ -243,28 +244,10 @@ class BaseImageCreator(BaseHookManager):
 
 
 
-    def haar_detection(self,image):
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        
-        faces = self.face_cascade.detectMultiScale(
-            gray, 
-            scaleFactor=1.05, 
-            minNeighbors=36,
-            minSize=(30, 30),
-            
-        )
-
-        
-        faces=list(faces)
-        
-        # for (x, y, w, h) in faces:
-        #     cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        # cv2.imshow("faces", image)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
-        
-        return faces
+    def face_detection(self,image):
+        image=np.array(image)[:,:,:3]
+        boxes = face_boxes_from_image(image, model_selection=1, min_conf=0.6)
+        return boxes
 
 
     def image_crop(self,image, mode: str = "center", upscale: bool = True):
@@ -324,21 +307,120 @@ class BaseImageCreator(BaseHookManager):
 
     def get_area_index(self):
         return {
-            "left_bottom":[0,3,5,7,8,10,14],
-            "right_bottom":[3,10,13,16],
-            "left_top":[3,4,5,9,11,12,14],
-            "right_top":[2,3,12,13],
-            "center":[1,3,5,6,9,12,15,17,18,19]
+            "left_bottom":[0,7,11,14],
+            "right_bottom":[7,13,16],
+            "left_top":[4,14],
+            "right_top":[2,13],
+            "left_mid":[5,8,9,14,17,19],
+            "right_mid":[8,13,16,17,19],
+            "mid_top":[4],
+            "mid_bottom":[10,16,18],
+            "mid_mid":[1,6,8,9,12,15,16,17,19],
+            "free":[0,2,3,7,10,11]#如果都不行就用万能的
         }
 
     def get_fit_area(self,image):
         image=self.image_crop(image)
+        boxes=self.face_detection(image)
         image=cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        areas=region_metrics(image)[1]
-        #faces=self.haar_detection(image)
+
+        _,_, areas=region_metrics_3x3(np.array(image)[:,:,:3],boxes=boxes,box_policy="iou",iou_thr=0.05)
+
+        union_free_area=set(range(20))
+        nonfree_areas=areas[3:]
         area_indexs=self.get_area_index()
-        print(areas)
-        first=set(area_indexs[areas[0]])
-        second=set(area_indexs[areas[1]])
-        result=first.union(second)
-        return result
+ 
+        union_nonfree_area=set()
+
+        for area in nonfree_areas:
+            union_nonfree_area=union_nonfree_area.union(set(area_indexs[area]))
+        #print(union_nonfree_area)
+        except_area=union_free_area.intersection(union_nonfree_area)
+        #print(except_area)
+        result_area=union_free_area-except_area
+        print(result_area)
+        if len(result_area)==0:
+            print("没有找到合适的区域")
+            return area_indexs["free"]
+        return result_area
+
+
+
+    def smart_face_crop(self,image, edge_thresh_ratio=0.12, face_pick="largest"):
+        """
+        根据人脸在画面中的位置自动选择裁剪模式：
+        - 人脸靠边：用 left/right/top/bottom
+        - 正常：用 center
+
+        Params
+        ------
+        image: PIL.Image 或 numpy 数组，能被 poster.face_detection 处理
+        poster: 你已有的对象，需提供
+            - poster.face_detection(image) -> List[[x1,y1,x2,y2], ...]  像素坐标
+            - poster.image_crop(image, mode="center")                 执行裁剪
+        edge_thresh_ratio: float
+            判定“靠边”的阈值，占图像宽/高的比例。比如 0.12 表示边缘 12% 宽度/高度的区域。
+        face_pick: "largest" | "nearest_center"
+            多人脸时如何挑选：最大框 或 最靠近中心的框
+        """
+        # 1) 获取图像尺寸
+        if hasattr(image, "shape"):  # numpy
+            H, W = image.shape[:2]
+        else:
+            W, H = image.size  # PIL
+
+        # 2) 检测人脸框
+        boxes = self.face_detection(image) or []
+        
+
+        # 若无脸，直接居中裁剪
+        if not boxes:
+            return self.image_crop(image, mode="center")
+
+        # 3) 选择一个“主脸”
+        def box_area(b):
+            x1, y1, x2, y2 = b
+            return max(0, x2 - x1) * max(0, y2 - y1)
+
+        def box_center_dist2(b):
+            x1, y1, x2, y2 = b
+            cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+            dx, dy = cx - W / 2.0, cy - H / 2.0
+            return dx * dx + dy * dy
+
+        if len(boxes) > 1:
+            if face_pick == "largest":
+                face = max(boxes, key=box_area)
+            else:
+                face = min(boxes, key=box_center_dist2)
+        else:
+            face = boxes[0]
+
+        x1, y1, x2, y2 = face
+        # 人脸中心与边缘距离（像素）
+        cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+        dist_left   = cx - 0
+        dist_right  = W - cx
+        dist_top    = cy - 0
+        dist_bottom = H - cy
+
+        # 4) 计算“靠边阈值”（像素）
+        thr_w = W * edge_thresh_ratio
+        thr_h = H * edge_thresh_ratio
+
+        # 5) 判断靠哪条边
+        # 优先级：谁更近用谁；如果左右都近，选更近的那一侧；上下同理。
+        # 若四个方向都大于阈值 → center
+        choices = []
+        if dist_left   < thr_w: choices.append(("left",   dist_left))
+        if dist_right  < thr_w: choices.append(("right",  dist_right))
+        if dist_top    < thr_h: choices.append(("top",    dist_top))
+        if dist_bottom < thr_h: choices.append(("bottom", dist_bottom))
+
+        if not choices:
+            mode = "center"
+        else:
+            # 选距离最小的边
+            mode = min(choices, key=lambda x: x[1])[0]
+        
+        return self.image_crop(image, mode=mode)

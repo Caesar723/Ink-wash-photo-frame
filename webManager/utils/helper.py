@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 import anyio
 import cv2
 import numpy as np
-
+import mediapipe as mp
 
 executor = ThreadPoolExecutor(max_workers=5)
 
@@ -216,3 +216,186 @@ def region_metrics(img):
 
 
     return results, sorted_results
+
+
+def face_boxes_from_image(img_rgb, model_selection=0, min_conf=0.5):
+    h, w = img_rgb.shape[:2]
+    #img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    with mp.solutions.face_detection.FaceDetection(
+        model_selection=model_selection, min_detection_confidence=min_conf
+    ) as fd:
+        res = fd.process(img_rgb)
+    boxes = []
+    if res.detections:
+        for det in res.detections:
+            rb = det.location_data.relative_bounding_box
+            x1 = int(rb.xmin * w)
+            y1 = int(rb.ymin * h)
+            x2 = int((rb.xmin + rb.width)  * w)
+            y2 = int((rb.ymin + rb.height) * h)
+            boxes.append([x1, y1, x2, y2])
+    return boxes
+
+
+
+
+def region_metrics_3x3(img, max_side=640, bins=16,
+                       edge_thresh1=80, edge_thresh2=160,
+                       weights=None,
+                       boxes=None,            # 新增：待“避让”的框（列表，每个[x1,y1,x2,y2]，像素坐标）
+                       box_policy="center",   # "center" 或 "iou"
+                       iou_thr=0.1            # 当 policy="iou" 时的判定阈值
+                       ):
+    """
+    3x3 九宫格区域打分；若传入 boxes，则包含这些 boxes 的区域优先级靠后。
+    img: BGR (OpenCV)
+    boxes: list of [x1,y1,x2,y2] (像素坐标, 与 img 对齐的坐标系)
+    box_policy:
+        - "center": 以 box 中心点落入区域判定该区域被占用
+        - "iou":    若 box 与区域的 IoU > iou_thr 判定被占用
+    """
+
+    if weights is None:
+        weights = dict(color_std=1.0, entropy=1.0, edge_density=1.0, lap_var=1.0)
+    if boxes is None:
+        boxes = []
+
+    # --- 轻量化缩放（注意：只用于特征计算；占用判定仍基于原图坐标！） ---
+    H0, W0 = img.shape[:2]
+    scale = float(max_side) / max(H0, W0)
+    if scale < 1.0:
+        img_small = cv2.resize(img, (int(W0 * scale), int(H0 * scale)), interpolation=cv2.INTER_AREA)
+    else:
+        img_small = img
+        scale = 1.0
+    h, w = img_small.shape[:2]
+
+    # --- 3x3 九宫格切分（小图坐标） ---
+    cxs = [0, w // 3, (2 * w) // 3, w]
+    cys = [0, h // 3, (2 * h) // 3, h]
+    grid_names = [
+        ["left_top",   "mid_top",   "right_top"],
+        ["left_mid",   "mid_mid",   "right_mid"],
+        ["left_bottom","mid_bottom","right_bottom"],
+    ]
+
+    # 小图中每个区域的 box（x1,y1,x2,y2）
+    regions_small = {}
+    for r in range(3):
+        for c in range(3):
+            name = grid_names[r][c]
+            x1, x2 = cxs[c], cxs[c + 1]
+            y1, y2 = cys[r], cys[r + 1]
+            if x2 <= x1: x2 = min(x1 + 1, w)
+            if y2 <= y1: y2 = min(y1 + 1, h)
+            regions_small[name] = (x1, y1, x2, y2)
+
+    # 同时给出对应“原图坐标”的区域（便于和 boxes 判定）
+    inv = 1.0 / scale
+    regions_full = {
+        k: (int(x1 * inv), int(y1 * inv), int(x2 * inv), int(y2 * inv))
+        for k, (x1, y1, x2, y2) in regions_small.items()
+    }
+
+    # --- 预计算特征（小图） ---
+    hsv  = cv2.cvtColor(img_small, cv2.COLOR_BGR2HSV)
+    gray = cv2.cvtColor(img_small, cv2.COLOR_BGR2GRAY)
+    max_entropy = np.log2(bins)
+
+    def iou(a, b):
+        ax1, ay1, ax2, ay2 = a
+        bx1, by1, bx2, by2 = b
+        ix1, iy1 = max(ax1, bx1), max(ay1, by1)
+        ix2, iy2 = min(ax2, bx2), min(ay2, by2)
+        iw, ih = max(0, ix2 - ix1), max(0, iy2 - iy1)
+        inter = iw * ih
+        area_a = max(0, ax2 - ax1) * max(0, ay2 - ay1)
+        area_b = max(0, bx2 - bx1) * max(0, by2 - by1)
+        union = area_a + area_b - inter + 1e-6
+        return inter / union
+
+    def center_in(box, region):
+        x1, y1, x2, y2 = box
+        cx, cy = (x1 + x2) / 2.0, (y1 + y2) / 2.0
+        rx1, ry1, rx2, ry2 = region
+        return (rx1 <= cx < rx2) and (ry1 <= cy < ry2)
+
+    results = {}
+
+    # 先逐块计算“内容特征”
+    for name, (sx1, sy1, sx2, sy2) in regions_small.items():
+        roi_hsv  = hsv[sy1:sy2, sx1:sx2]
+        roi_gray = gray[sy1:sy2, sx1:sx2]
+        if roi_gray.size == 0:
+            results[name] = dict(
+                box=regions_full[name],
+                color_std=0.0, entropy=0.0, edge_density=0.0, lap_var=0.0,
+                monotone_score=0.0, rich_score=0.0,
+                occupied=False
+            )
+            continue
+
+        h_std = float(roi_hsv[:, :, 0].std())
+        s_std = float(roi_hsv[:, :, 1].std())
+        v_std = float(roi_hsv[:, :, 2].std())
+        color_var = (h_std + s_std + v_std) / 3.0
+
+        hist = cv2.calcHist([roi_gray], [0], None, [bins], [0, 256]).flatten()
+        p = hist / (hist.sum() + 1e-8)
+        entropy = float(-(p * np.log2(p + 1e-12)).sum())
+        entropy_n = entropy / (max_entropy + 1e-8)
+
+        edges = cv2.Canny(roi_gray, edge_thresh1, edge_thresh2, L2gradient=False)
+        edge_density = float(edges.mean()) / 255.0
+
+        lap = cv2.Laplacian(roi_gray, cv2.CV_32F)
+        lap_var = float(lap.var())
+        lap_sqrt = np.sqrt(lap_var + 1e-6)
+
+        rich_score = (
+            weights["color_std"]    * color_var   +
+            weights["entropy"]      * entropy_n   +
+            weights["edge_density"] * edge_density+
+            weights["lap_var"]      * lap_sqrt
+        )
+        monotone_score = (
+            weights["color_std"]    * (1.0 / (color_var + 1e-6)) +
+            weights["entropy"]      * (1.0 - entropy_n)         +
+            weights["edge_density"] * (1.0 - edge_density)      +
+            weights["lap_var"]      * (1.0 / (lap_sqrt + 1e-6))
+        )
+
+        results[name] = dict(
+            box=regions_full[name],          # 原图坐标系下的区域框
+            color_std=color_var,
+            entropy=entropy,
+            edge_density=edge_density,
+            lap_var=lap_var,
+            monotone_score=float(monotone_score),
+            rich_score=float(rich_score),
+            occupied=False                   # 先标 False，下一步判定
+        )
+
+    # --- 判定哪些区域被 boxes 占用（用原图坐标） ---
+    if boxes:
+        for name, r_full in regions_full.items():
+            occ = False
+            for b in boxes:
+                if box_policy == "center":
+                    if center_in(b, r_full):
+                        occ = True; break
+                else:  # "iou"
+                    if iou(b, r_full) > iou_thr:
+                        occ = True; break
+            results[name]["occupied"] = occ
+
+    # --- 生成两套排序 ---
+    # 1) 按“丰富度”从低到高（你原来的 sorted_by_rich）
+    base_sorted = [k for k, _ in sorted(results.items(), key=lambda kv: kv[1]["rich_score"])]
+
+    # 2) 将 occupied=True 的区域降级到末尾，且保持各自相对顺序
+    not_occ = [k for k in base_sorted if not results[k]["occupied"]]
+    occ     = [k for k in base_sorted if results[k]["occupied"]]
+    sorted_pref = not_occ + occ
+
+    return results, base_sorted, sorted_pref

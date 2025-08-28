@@ -11,7 +11,7 @@ import os
 if __name__ == "__main__":
     import sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from webManager.utils.helper import read_yaml
+from webManager.utils.helper import read_yaml,region_metrics_3x3
 from webManager.utils.baseImageCreator import BaseImageCreator
 
 class Poster(BaseImageCreator):
@@ -147,11 +147,14 @@ class Poster(BaseImageCreator):
 if __name__ == "__main__":
     import cv2
     import numpy as np
+    from PIL import ImageOps
     async def main():
         
         poster=Poster(config=read_yaml("webManager/config/basic.yaml"))
-        
         image=await poster.create_image()
         image.show()
+        #print(boxes)
+        # image=await poster.create_image()
+        # image.show()
         
     asyncio.run(main())

@@ -16,3 +16,4 @@ apscheduler
 opencv-python
 playwright
 aiofiles
+mediapipe
