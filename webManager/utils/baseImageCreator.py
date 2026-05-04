@@ -126,25 +126,45 @@ class BaseImageCreator(BaseHookManager):
 
 
     async def url_to_image(self,url: str):
-        #print(self)
+        browser = None
+        context = None
+        page = None
+
         async with async_playwright() as p:
-            browser = await p.chromium.launch()
-            context = await browser.new_context(
-                viewport={"width": self.config["target_img_size"][1], "height": self.config["target_img_size"][0]},
-                device_scale_factor=1,
-            )
-            #print({"width": self.config["target_img_size"][0], "height": self.config["target_img_size"][1]})
-            page = await context.new_page()
-            
-            await page.goto(url, wait_until="networkidle")
-            await page.wait_for_timeout(1000)
-            image_bytes = await page.screenshot(timeout=120_000)
-            await browser.close()
+            try:
+                browser = await p.chromium.launch(
+                    headless=True,
+                    args=[
+                        "--disable-gpu",
+                        "--disable-dev-shm-usage",
+                        "--no-sandbox",
+                    ],
+                )
 
-            image = Image.open(BytesIO(image_bytes))
+                context = await browser.new_context(
+                    viewport={
+                        "width": self.config["target_img_size"][1],
+                        "height": self.config["target_img_size"][0],
+                    },
+                    device_scale_factor=1,
+                )
 
-        #image.show()
-        return image
+                page = await context.new_page()
+                await page.goto(url, wait_until="domcontentloaded", timeout=30_000)
+                await page.wait_for_timeout(500)
+
+                image_bytes = await page.screenshot(timeout=30_000)
+
+                with Image.open(BytesIO(image_bytes)) as img:
+                    return img.convert("RGB").copy()
+
+            finally:
+                if page is not None:
+                    await page.close()
+                if context is not None:
+                    await context.close()
+                if browser is not None:
+                    await browser.close()
 
     def image_rotate(self,image):
         if self.config["target_img_size"][0]>self.config["target_img_size"][1]:
