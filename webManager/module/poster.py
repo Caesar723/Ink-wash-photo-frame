@@ -112,7 +112,7 @@ class Poster(BaseImageCreator):
         pass
 
     async def create_image(self):
-        base_url = f"http://0.0.0.0:{self.config['basic_port']}/poster"
+        base_url = f"http://127.0.0.1:{self.config['basic_port']}/poster"
         content=await self.get_chat_response()
         data=self.get_content(content)
         img_path=self.get_image_path(self.config["basic_store_path"])

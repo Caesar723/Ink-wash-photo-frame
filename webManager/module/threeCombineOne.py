@@ -69,7 +69,7 @@ class ThreeCombineOne(BaseImageCreator):
         pass
 
     async def create_image(self):
-        base_url = f"http://0.0.0.0:{self.config['basic_port']}/threeCombineOne"
+        base_url = f"http://127.0.0.1:{self.config['basic_port']}/threeCombineOne"
         content,summary_whether=await self.get_chat_response()
         #font_path=self.get_font_path()
 

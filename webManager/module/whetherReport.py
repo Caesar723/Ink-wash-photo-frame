@@ -20,7 +20,7 @@ class BaseWhetherReport(BaseImageCreator):
         pass
 
     async def create_image(self):
-        base_url = f"http://0.0.0.0:{self.config['basic_port']}/whether"
+        base_url = f"http://127.0.0.1:{self.config['basic_port']}/whether"
 
         image=await self.url_to_image(base_url)
         return image

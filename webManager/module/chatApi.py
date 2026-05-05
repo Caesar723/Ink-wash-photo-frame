@@ -56,7 +56,7 @@ class ChatApi(BaseImageCreator):
         pass
 
     async def create_image(self):
-        base_url = f"http://0.0.0.0:{self.config['basic_port']}/text"
+        base_url = f"http://127.0.0.1:{self.config['basic_port']}/text"
         content=await self.get_chat_response()
         font_path=self.get_font_path()
         styles=["ancient","modern","corner","floral"]

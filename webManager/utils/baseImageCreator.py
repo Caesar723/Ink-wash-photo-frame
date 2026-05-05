@@ -14,8 +14,11 @@ import mediapipe as mp
 
 from webManager.utils.helper import region_metrics,face_boxes_from_image,region_metrics_3x3
 from webManager.utils.baseHookManager import BaseHookManager
+from webManager.utils.baseBrowserRenderer import BrowserRenderer
 
 class BaseImageCreator(BaseHookManager):
+    browser_renderer = None
+
     def __init__(self,config):
         super().__init__()
         self.config=config
@@ -32,6 +35,8 @@ class BaseImageCreator(BaseHookManager):
 
         self.profile_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_profileface.xml")
         
+        if BaseImageCreator.browser_renderer is None:
+            BaseImageCreator.browser_renderer = BrowserRenderer(config)
         
     async def get_chat_response(self,extra=None):
         
@@ -126,45 +131,7 @@ class BaseImageCreator(BaseHookManager):
 
 
     async def url_to_image(self,url: str):
-        browser = None
-        context = None
-        page = None
-
-        async with async_playwright() as p:
-            try:
-                browser = await p.chromium.launch(
-                    headless=True,
-                    args=[
-                        "--disable-gpu",
-                        "--disable-dev-shm-usage",
-                        "--no-sandbox",
-                    ],
-                )
-
-                context = await browser.new_context(
-                    viewport={
-                        "width": self.config["target_img_size"][1],
-                        "height": self.config["target_img_size"][0],
-                    },
-                    device_scale_factor=1,
-                )
-
-                page = await context.new_page()
-                await page.goto(url, wait_until="domcontentloaded", timeout=30_000)
-                await page.wait_for_timeout(500)
-
-                image_bytes = await page.screenshot(timeout=30_000)
-
-                with Image.open(BytesIO(image_bytes)) as img:
-                    return img.convert("RGB").copy()
-
-            finally:
-                if page is not None:
-                    await page.close()
-                if context is not None:
-                    await context.close()
-                if browser is not None:
-                    await browser.close()
+        return await BaseImageCreator.browser_renderer.render_url(url)
 
     def image_rotate(self,image):
         if self.config["target_img_size"][0]>self.config["target_img_size"][1]:
