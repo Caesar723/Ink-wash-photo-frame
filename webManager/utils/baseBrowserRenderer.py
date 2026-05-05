@@ -51,6 +51,11 @@ class BrowserRenderer:
         try:
             page = await self.context.new_page()
 
+            await page.set_viewport_size({
+                "width": self.config["target_img_size"][1],
+                "height": self.config["target_img_size"][0],
+            })
+
             await page.goto(
                 url,
                 wait_until="domcontentloaded",
